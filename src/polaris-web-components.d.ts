@@ -9,6 +9,7 @@ declare global {
       's-table-body': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
       's-table-row': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
       's-table-cell': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      's-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { type?: string; tone?: string; size?: string; color?: string }, HTMLElement>;
     }
   }
 }

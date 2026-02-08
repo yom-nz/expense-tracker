@@ -78,11 +78,11 @@ function App() {
   ]
 
   const navigationItems = [
-    { label: 'Dashboard', onClick: () => setSelectedTab(0) },
-    { label: 'People', onClick: () => setSelectedTab(1) },
-    { label: 'Expenses', onClick: () => setSelectedTab(2) },
-    { label: 'Balances', onClick: () => setSelectedTab(3) },
-    { label: 'Statistics', onClick: () => setSelectedTab(4) }
+    { label: 'Dashboard', icon: 'home', onClick: () => setSelectedTab(0) },
+    { label: 'People', icon: 'customers', onClick: () => setSelectedTab(1) },
+    { label: 'Expenses', icon: 'receipt', onClick: () => setSelectedTab(2) },
+    { label: 'Balances', icon: 'finances', onClick: () => setSelectedTab(3) },
+    { label: 'Statistics', icon: 'chart-vertical', onClick: () => setSelectedTab(4) }
   ]
 
   return (
@@ -184,6 +184,7 @@ function App() {
                     width: '100%',
                     display: 'flex',
                     alignItems: 'center',
+                    gap: '12px',
                     padding: '8px 12px',
                     marginBottom: '2px',
                     border: 'none',
@@ -207,7 +208,8 @@ function App() {
                     }
                   }}
                 >
-                  {item.label}
+                  <s-icon type={item.icon} size="small" color={selectedTab === index ? 'base' : 'subdued'} />
+                  <span>{item.label}</span>
                 </button>
               ))}
             </nav>
