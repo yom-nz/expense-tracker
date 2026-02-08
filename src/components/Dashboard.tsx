@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Layout, Card, Text, InlineStack, BlockStack, Tabs, Button } from '@shopify/polaris'
-import { supabase, Person, Expense, Settlement } from '../lib/supabase'
+import { Card, Text, InlineStack, BlockStack, Tabs, Button } from '@shopify/polaris'
+import { supabase, type Person, Expense, Settlement } from '../lib/supabase'
 import PeopleManager from './PeopleManager'
 import ExpenseManager from './ExpenseManager'
 import BalancesView from './BalancesView'

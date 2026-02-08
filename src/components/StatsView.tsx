@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Card, BlockStack, Text, DataTable } from '@shopify/polaris'
-import { Expense, Person } from '../lib/supabase'
+import type { Expense, Person } from '../lib/supabase'
 
 interface Props {
   expenses: Expense[]

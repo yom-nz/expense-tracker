@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { AppProvider, Page, Frame } from '@shopify/polaris'
-import { supabase, Collection } from './lib/supabase'
+import { supabase, type Collection } from './lib/supabase'
 import Dashboard from './components/Dashboard'
 import CollectionSelector from './components/CollectionSelector'
 
