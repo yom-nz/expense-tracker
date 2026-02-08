@@ -617,39 +617,16 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
                 {subgroups.length > 0 ? (
                   <InlineStack gap="200">
                     {subgroups.map(subgroup => (
-                      <div
+                      <s-clickablechip
                         key={subgroup.id}
+                        removable
                         onClick={() => {
                           setSubgroupToRemove(subgroup)
                           setRemoveSubgroupModalOpen(true)
                         }}
-                        style={{
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          padding: '4px 12px',
-                          borderRadius: '8px',
-                          backgroundColor: '#E3F1FF',
-                          border: '1px solid #B4D9FF',
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#B4D9FF'
-                          e.currentTarget.style.borderColor = '#7AB8FF'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = '#E3F1FF'
-                          e.currentTarget.style.borderColor = '#B4D9FF'
-                        }}
                       >
-                        <span style={{ fontSize: '13px', fontWeight: 500, color: '#004C9A' }}>
-                          {subgroup.name}
-                        </span>
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12 4L4 12M4 4L12 12" stroke="#004C9A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
+                        {subgroup.name}
+                      </s-clickablechip>
                     ))}
                   </InlineStack>
                 ) : (
