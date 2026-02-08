@@ -1,72 +1,95 @@
 import { useState, useEffect } from 'react'
-import { AppProvider, Page, Frame } from '@shopify/polaris'
-import { supabase, type Collection } from './lib/supabase'
+import { AppProvider, Frame, TopBar, InlineStack, Text } from '@shopify/polaris'
+import { supabase, type Occasion } from './lib/supabase'
 import Dashboard from './components/Dashboard'
-import CollectionSelector from './components/CollectionSelector'
+import OccasionSelector from './components/OccasionSelector'
 
 function App() {
-  const [collections, setCollections] = useState<Collection[]>([])
-  const [currentCollection, setCurrentCollection] = useState<Collection | null>(null)
+  const [occasions, setOccasions] = useState<Occasion[]>([])
+  const [currentOccasion, setCurrentOccasion] = useState<Occasion | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadCollections()
+    loadOccasions()
   }, [])
 
-  const loadCollections = async () => {
+  const loadOccasions = async () => {
     try {
       const { data, error } = await supabase
-        .from('collections')
+        .from('occasions')
         .select('*')
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setCollections(data || [])
-      if (data && data.length > 0 && !currentCollection) {
-        setCurrentCollection(data[0])
+      setOccasions(data || [])
+      if (data && data.length > 0 && !currentOccasion) {
+        setCurrentOccasion(data[0])
       }
     } catch (error) {
-      console.error('Error loading collections:', error)
+      console.error('Error loading occasions:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleCollectionChange = (collectionId: string) => {
-    const collection = collections.find(c => c.id === collectionId)
-    if (collection) {
-      setCurrentCollection(collection)
+  const handleOccasionChange = (occasionId: string) => {
+    const occasion = occasions.find(c => c.id === occasionId)
+    if (occasion) {
+      setCurrentOccasion(occasion)
     }
   }
 
-  const handleCollectionCreated = () => {
-    loadCollections()
+  const handleOccasionCreated = () => {
+    loadOccasions()
+  }
+
+  const topBarMarkup = (
+    <TopBar
+      showNavigationToggle={false}
+    />
+  )
+
+  const logo = {
+    width: 40,
+    topBarSource: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect width="40" height="40" fill="%23008060"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="white" font-size="20" font-weight="bold"%3EE%3C/text%3E%3C/svg%3E',
+    contextualSaveBarSource: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect width="40" height="40" fill="%23008060"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="white" font-size="20" font-weight="bold"%3EE%3C/text%3E%3C/svg%3E',
+    url: '/',
+    accessibilityLabel: 'Expense Tracker',
   }
 
   return (
     <AppProvider i18n={{}}>
-      <Frame>
-        <Page
-          title="Expense Tracker"
-          subtitle={currentCollection ? currentCollection.name : 'No collection selected'}
-        >
-          <CollectionSelector
-            collections={collections}
-            currentCollection={currentCollection}
-            onCollectionChange={handleCollectionChange}
-            onCollectionCreated={handleCollectionCreated}
-          />
+      <Frame
+        topBar={topBarMarkup}
+        logo={logo}
+      >
+        <div style={{ padding: '1rem' }}>
+          <InlineStack align="space-between" blockAlign="center" gap="400">
+            <Text as="h1" variant="headingXl">Expense Tracker</Text>
+            {currentOccasion && (
+              <Text as="p" variant="bodyMd" tone="subdued">{currentOccasion.name}</Text>
+            )}
+          </InlineStack>
+
+          <div style={{ marginTop: '1rem' }}>
+            <OccasionSelector
+              occasions={occasions}
+              currentOccasion={currentOccasion}
+              onOccasionChange={handleOccasionChange}
+              onOccasionCreated={handleOccasionCreated}
+            />
+          </div>
           
-          {!loading && currentCollection && (
-            <Dashboard collectionId={currentCollection.id} />
+          {!loading && currentOccasion && (
+            <Dashboard occasionId={currentOccasion.id} />
           )}
           
-          {!loading && !currentCollection && (
-            <Page title="Welcome">
-              <p>Create a collection to get started!</p>
-            </Page>
+          {!loading && !currentOccasion && (
+            <div style={{ marginTop: '2rem' }}>
+              <Text as="p">Create an occasion to get started!</Text>
+            </div>
           )}
-        </Page>
+        </div>
       </Frame>
     </AppProvider>
   )

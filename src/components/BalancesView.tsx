@@ -3,7 +3,7 @@ import { Card, BlockStack, Text, InlineStack, Button, Modal, Select, TextField, 
 import { supabase, type Person, type Expense, type Settlement } from '../lib/supabase'
 
 interface Props {
-  collectionId: string
+  occasionId: string
   people: Person[]
   expenses: Expense[]
   settlements: Settlement[]
@@ -16,7 +16,7 @@ interface Balance {
   balance: number
 }
 
-export default function BalancesView({ collectionId, people, expenses, settlements, onSettlementAdded }: Props) {
+export default function BalancesView({ occasionId, people, expenses, settlements, onSettlementAdded }: Props) {
   const [balances, setBalances] = useState<Balance[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [newSettlement, setNewSettlement] = useState({
@@ -85,7 +85,7 @@ export default function BalancesView({ collectionId, people, expenses, settlemen
       const { error } = await supabase
         .from('settlements')
         .insert([{
-          collection_id: collectionId,
+          occasion_id: occasionId,
           from_person_id: newSettlement.from,
           to_person_id: newSettlement.to,
           amount: parseFloat(newSettlement.amount)

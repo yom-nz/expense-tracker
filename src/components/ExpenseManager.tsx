@@ -3,12 +3,12 @@ import { Card, TextField, Button, Select, BlockStack, InlineStack, Text, DataTab
 import { supabase, type Person, type Expense, type ExpenseSplit } from '../lib/supabase'
 
 interface Props {
-  collectionId: string
+  occasionId: string
   people: Person[]
   onUpdate: () => void
 }
 
-export default function ExpenseManager({ collectionId, people, onUpdate }: Props) {
+export default function ExpenseManager({ occasionId, people, onUpdate }: Props) {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [splits, setSplits] = useState<Record<string, ExpenseSplit[]>>({})
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -25,14 +25,14 @@ export default function ExpenseManager({ collectionId, people, onUpdate }: Props
 
   useEffect(() => {
     loadExpenses()
-  }, [collectionId])
+  }, [occasionId])
 
   const loadExpenses = async () => {
     try {
       const { data: expensesData, error: expensesError } = await supabase
         .from('expenses')
         .select('*')
-        .eq('collection_id', collectionId)
+        .eq('occasion_id', occasionId)
         .order('date', { ascending: false })
 
       if (expensesError) throw expensesError
@@ -70,7 +70,7 @@ export default function ExpenseManager({ collectionId, people, onUpdate }: Props
       const { data: expenseData, error: expenseError } = await supabase
         .from('expenses')
         .insert([{
-          collection_id: collectionId,
+          occasion_id: occasionId,
           payer_person_id: newExpense.payer,
           amount,
           description: newExpense.description,
@@ -113,20 +113,36 @@ export default function ExpenseManager({ collectionId, people, onUpdate }: Props
     }
   }
 
-  const handleDeleteExpense = async (expenseId: string) => {
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+
+  const handleDeleteExpense = async () => {
+    if (!expenseToDelete) return
+    
+    setDeleting(true)
     try {
       const { error } = await supabase
         .from('expenses')
         .delete()
-        .eq('id', expenseId)
+        .eq('id', expenseToDelete)
 
       if (error) throw error
 
+      setDeleteModalOpen(false)
+      setExpenseToDelete(null)
       loadExpenses()
       onUpdate()
     } catch (error) {
       console.error('Error deleting expense:', error)
+    } finally {
+      setDeleting(false)
     }
+  }
+
+  const openDeleteModal = (expenseId: string) => {
+    setExpenseToDelete(expenseId)
+    setDeleteModalOpen(true)
   }
 
   const togglePerson = (personId: string) => {
@@ -156,7 +172,7 @@ export default function ExpenseManager({ collectionId, people, onUpdate }: Props
       expense.description,
       expense.category,
       splitWith,
-      <Button key={expense.id} onClick={() => handleDeleteExpense(expense.id)} tone="critical" size="slim">
+      <Button key={expense.id} onClick={() => openDeleteModal(expense.id)} tone="critical" size="slim">
         Delete
       </Button>
     ]
@@ -182,6 +198,28 @@ export default function ExpenseManager({ collectionId, people, onUpdate }: Props
           )}
         </BlockStack>
       </Card>
+
+      <Modal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        title="Delete Expense"
+        primaryAction={{
+          content: 'Delete',
+          onAction: handleDeleteExpense,
+          loading: deleting,
+          destructive: true
+        }}
+        secondaryActions={[
+          {
+            content: 'Cancel',
+            onAction: () => setDeleteModalOpen(false)
+          }
+        ]}
+      >
+        <Modal.Section>
+          <Text as="p">Are you sure you want to delete this expense? This action cannot be undone.</Text>
+        </Modal.Section>
+      </Modal>
 
       <Modal
         open={isModalOpen}

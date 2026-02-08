@@ -1,41 +1,41 @@
 import { useState } from 'react'
 import { Card, Select, Button, Modal, TextField, InlineStack } from '@shopify/polaris'
-import { supabase, type Collection } from '../lib/supabase'
+import { supabase, type Occasion } from '../lib/supabase'
 
 interface Props {
-  collections: Collection[]
-  currentCollection: Collection | null
-  onCollectionChange: (collectionId: string) => void
-  onCollectionCreated: () => void
+  occasions: Occasion[]
+  currentOccasion: Occasion | null
+  onOccasionChange: (occasionId: string) => void
+  onOccasionCreated: () => void
 }
 
-export default function CollectionSelector({ collections, currentCollection, onCollectionChange, onCollectionCreated }: Props) {
+export default function OccasionSelector({ occasions, currentOccasion, onOccasionChange, onOccasionCreated }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [newCollectionName, setNewCollectionName] = useState('')
+  const [newOccasionName, setNewOccasionName] = useState('')
   const [creating, setCreating] = useState(false)
 
-  const handleCreateCollection = async () => {
-    if (!newCollectionName.trim()) return
+  const handleCreateOccasion = async () => {
+    if (!newOccasionName.trim()) return
 
     setCreating(true)
     try {
       const { error } = await supabase
-        .from('collections')
-        .insert([{ name: newCollectionName.trim() }])
+        .from('occasions')
+        .insert([{ name: newOccasionName.trim() }])
 
       if (error) throw error
 
-      setNewCollectionName('')
+      setNewOccasionName('')
       setIsModalOpen(false)
-      onCollectionCreated()
+      onOccasionCreated()
     } catch (error) {
-      console.error('Error creating collection:', error)
+      console.error('Error creating occasion:', error)
     } finally {
       setCreating(false)
     }
   }
 
-  const options = collections.map(c => ({
+  const options = occasions.map(c => ({
     label: c.name,
     value: c.id
   }))
@@ -46,25 +46,25 @@ export default function CollectionSelector({ collections, currentCollection, onC
         <InlineStack gap="400" align="space-between" blockAlign="center">
           <div style={{ flex: 1, maxWidth: '400px' }}>
             <Select
-              label="Collection"
+              label="Occasion"
               options={options}
-              value={currentCollection?.id || ''}
-              onChange={onCollectionChange}
+              value={currentOccasion?.id || ''}
+              onChange={onOccasionChange}
             />
           </div>
-          <Button onClick={() => setIsModalOpen(true)}>New Collection</Button>
+          <Button onClick={() => setIsModalOpen(true)}>New Occasion</Button>
         </InlineStack>
       </Card>
 
       <Modal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Create New Collection"
+        title="Create New Occasion"
         primaryAction={{
           content: 'Create',
-          onAction: handleCreateCollection,
+          onAction: handleCreateOccasion,
           loading: creating,
-          disabled: !newCollectionName.trim()
+          disabled: !newOccasionName.trim()
         }}
         secondaryActions={[
           {
@@ -75,9 +75,9 @@ export default function CollectionSelector({ collections, currentCollection, onC
       >
         <Modal.Section>
           <TextField
-            label="Collection Name"
-            value={newCollectionName}
-            onChange={setNewCollectionName}
+            label="Occasion Name"
+            value={newOccasionName}
+            onChange={setNewOccasionName}
             placeholder="e.g., Rarotonga Trip, Weekend Dinner"
             autoComplete="off"
           />

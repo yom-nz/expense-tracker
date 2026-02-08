@@ -7,10 +7,10 @@ import BalancesView from './BalancesView'
 import StatsView from './StatsView'
 
 interface Props {
-  collectionId: string
+  occasionId: string
 }
 
-export default function Dashboard({ collectionId }: Props) {
+export default function Dashboard({ occasionId }: Props) {
   const [selected, setSelected] = useState(0)
   const [people, setPeople] = useState<Person[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
@@ -23,7 +23,7 @@ export default function Dashboard({ collectionId }: Props) {
 
   useEffect(() => {
     loadData()
-  }, [collectionId])
+  }, [occasionId])
 
   const loadData = async () => {
     await Promise.all([
@@ -38,7 +38,7 @@ export default function Dashboard({ collectionId }: Props) {
       const { data, error } = await supabase
         .from('people')
         .select('*')
-        .eq('collection_id', collectionId)
+        .eq('occasion_id', occasionId)
 
       if (error) throw error
       setPeople(data || [])
@@ -52,7 +52,7 @@ export default function Dashboard({ collectionId }: Props) {
       const { data, error } = await supabase
         .from('expenses')
         .select('*')
-        .eq('collection_id', collectionId)
+        .eq('occasion_id', occasionId)
         .order('date', { ascending: false })
 
       if (error) throw error
@@ -70,7 +70,7 @@ export default function Dashboard({ collectionId }: Props) {
       const { data, error } = await supabase
         .from('settlements')
         .select('*')
-        .eq('collection_id', collectionId)
+        .eq('occasion_id', occasionId)
         .order('date', { ascending: false })
 
       if (error) throw error
@@ -130,9 +130,9 @@ export default function Dashboard({ collectionId }: Props) {
               <BlockStack gap="200">
                 <Text as="h3" variant="headingMd">Quick Actions</Text>
                 <InlineStack gap="200">
-                  <Button onClick={() => setSelected(2)}>Add Expense</Button>
-                  <Button onClick={() => setSelected(1)}>Manage People</Button>
-                  <Button onClick={() => setSelected(3)}>View Balances</Button>
+                  <Button variant="primary" tone="success" onClick={() => setSelected(2)}>Add Expense</Button>
+                  <Button variant="primary" tone="success" onClick={() => setSelected(1)}>Manage People</Button>
+                  <Button variant="primary" tone="success" onClick={() => setSelected(3)}>View Balances</Button>
                 </InlineStack>
               </BlockStack>
             </BlockStack>
@@ -140,12 +140,12 @@ export default function Dashboard({ collectionId }: Props) {
         )}
         
         {selected === 1 && (
-          <PeopleManager collectionId={collectionId} onUpdate={loadPeople} />
+          <PeopleManager occasionId={occasionId} onUpdate={loadPeople} />
         )}
         
         {selected === 2 && (
           <ExpenseManager 
-            collectionId={collectionId} 
+            occasionId={occasionId} 
             people={people}
             onUpdate={loadExpenses}
           />
@@ -153,7 +153,7 @@ export default function Dashboard({ collectionId }: Props) {
         
         {selected === 3 && (
           <BalancesView 
-            collectionId={collectionId}
+            occasionId={occasionId}
             people={people}
             expenses={expenses}
             settlements={settlements}

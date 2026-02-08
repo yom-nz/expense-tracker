@@ -5,23 +5,25 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-export type Collection = {
+export type Occasion = {
   id: string
   name: string
   created_at: string
   updated_at: string
 }
 
+export type Collection = Occasion
+
 export type Person = {
   id: string
-  collection_id: string
+  occasion_id: string
   name: string
   created_at: string
 }
 
 export type Subgroup = {
   id: string
-  collection_id: string
+  occasion_id: string
   name: string
   created_at: string
 }
@@ -34,7 +36,7 @@ export type SubgroupMember = {
 
 export type Expense = {
   id: string
-  collection_id: string
+  occasion_id: string
   payer_person_id: string | null
   payer_subgroup_id: string | null
   amount: number
@@ -54,7 +56,7 @@ export type ExpenseSplit = {
 
 export type Settlement = {
   id: string
-  collection_id: string
+  occasion_id: string
   from_person_id: string | null
   from_subgroup_id: string | null
   to_person_id: string | null
