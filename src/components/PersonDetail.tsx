@@ -77,6 +77,10 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
   
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  
+  const [removeSubgroupModalOpen, setRemoveSubgroupModalOpen] = useState(false)
+  const [subgroupToRemove, setSubgroupToRemove] = useState<Subgroup | null>(null)
+  const [removingFromSubgroup, setRemovingFromSubgroup] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -428,6 +432,30 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
     }
   }
 
+  const handleRemoveFromSubgroup = async () => {
+    if (!subgroupToRemove) return
+
+    setRemovingFromSubgroup(true)
+    try {
+      const { error } = await supabase
+        .from('subgroup_members')
+        .delete()
+        .eq('subgroup_id', subgroupToRemove.id)
+        .eq('person_id', personId)
+
+      if (error) throw error
+
+      setRemoveSubgroupModalOpen(false)
+      setSubgroupToRemove(null)
+      loadData()
+      onUpdate?.()
+    } catch (error) {
+      console.error('Error removing from subgroup:', error)
+    } finally {
+      setRemovingFromSubgroup(false)
+    }
+  }
+
   if (loading || !person) {
     return <div>Loading...</div>
   }
@@ -589,32 +617,39 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
                 {subgroups.length > 0 ? (
                   <InlineStack gap="200">
                     {subgroups.map(subgroup => (
-                      <button
+                      <div
                         key={subgroup.id}
-                        onClick={async (e) => {
-                          e.stopPropagation()
-                          try {
-                            const { error } = await supabase
-                              .from('subgroup_members')
-                              .delete()
-                              .eq('subgroup_id', subgroup.id)
-                              .eq('person_id', personId)
-
-                            if (error) throw error
-
-                            loadData()
-                            onUpdate?.()
-                          } catch (error) {
-                            console.error('Error removing from subgroup:', error)
-                          }
+                        onClick={() => {
+                          setSubgroupToRemove(subgroup)
+                          setRemoveSubgroupModalOpen(true)
                         }}
                         style={{
-                          all: 'unset',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '4px 12px',
+                          borderRadius: '8px',
+                          backgroundColor: '#E3F1FF',
+                          border: '1px solid #B4D9FF',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#B4D9FF'
+                          e.currentTarget.style.borderColor = '#7AB8FF'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#E3F1FF'
+                          e.currentTarget.style.borderColor = '#B4D9FF'
                         }}
                       >
-                        <Badge key={subgroup.id} tone="info">{subgroup.name}</Badge>
-                      </button>
+                        <span style={{ fontSize: '13px', fontWeight: 500, color: '#004C9A' }}>
+                          {subgroup.name}
+                        </span>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 4L4 12M4 4L12 12" stroke="#004C9A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
                     ))}
                   </InlineStack>
                 ) : (
@@ -807,6 +842,40 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
             ) : (
               <Text as="p" tone="subdued">No subgroups available. Create subgroups first.</Text>
             )}
+          </BlockStack>
+        </Modal.Section>
+      </Modal>
+
+      <Modal
+        open={removeSubgroupModalOpen}
+        onClose={() => setRemoveSubgroupModalOpen(false)}
+        title="Remove from Subgroup"
+        primaryAction={{
+          content: 'Remove',
+          onAction: handleRemoveFromSubgroup,
+          loading: removingFromSubgroup,
+          destructive: true
+        }}
+        secondaryActions={[
+          {
+            content: 'Cancel',
+            onAction: () => setRemoveSubgroupModalOpen(false)
+          }
+        ]}
+      >
+        <Modal.Section>
+          <BlockStack gap="400">
+            <div style={{
+              padding: '12px 16px',
+              backgroundColor: '#FFF4E5',
+              border: '1px solid #FFD79D',
+              borderRadius: '8px'
+            }}>
+              <Text as="p" tone="caution">
+                {person.name} will be removed from the subgroup "{subgroupToRemove?.name}"
+              </Text>
+            </div>
+            <Text as="p">Are you sure you want to continue?</Text>
           </BlockStack>
         </Modal.Section>
       </Modal>
