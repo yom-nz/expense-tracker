@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Card, TextField, Button, List, InlineStack, BlockStack Text } from '@shopify/polaris'
-import { supabase, type Person, Subgroup, SubgroupMember } from '../lib/supabase'
+import { Card, TextField, Button, List, InlineStack, BlockStack, Text } from '@shopify/polaris'
+import { supabase, type Person, type Subgroup, type SubgroupMember } from '../lib/supabase'
 
 interface Props {
   collectionId: string
