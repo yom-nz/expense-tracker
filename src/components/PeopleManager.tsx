@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Card, TextField, Button, InlineStack, BlockStack, Text, Modal, Checkbox } from '@shopify/polaris'
+import { Card, TextField, Button, InlineStack, BlockStack, Text, Modal, Checkbox, Badge } from '@shopify/polaris'
 import { supabase, type Person, type Subgroup, type SubgroupMember } from '../lib/supabase'
+import PersonDetail from './PersonDetail'
+import SubgroupDetail from './SubgroupDetail'
 
 interface Props {
   occasionId: string
@@ -24,6 +26,10 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
   const [deleteSubgroupModalOpen, setDeleteSubgroupModalOpen] = useState(false)
   const [subgroupToDelete, setSubgroupToDelete] = useState<string | null>(null)
   const [deletingSubgroup, setDeletingSubgroup] = useState(false)
+  const [addPersonModalOpen, setAddPersonModalOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null)
+  const [selectedSubgroupId, setSelectedSubgroupId] = useState<string | null>(null)
 
   useEffect(() => {
     loadData()
@@ -90,6 +96,7 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
       if (error) throw error
 
       setNewPersonName('')
+      setAddPersonModalOpen(false)
       loadPeople()
       onUpdate()
     } catch (error) {
@@ -249,108 +256,194 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
     setSelectedMembers(newSelected)
   }
 
+  const filteredPeople = people.filter(person =>
+    person.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  if (selectedPersonId) {
+    return (
+      <PersonDetail
+        personId={selectedPersonId}
+        occasionId={occasionId}
+        onBack={() => setSelectedPersonId(null)}
+        onUpdate={loadData}
+      />
+    )
+  }
+
+  if (selectedSubgroupId) {
+    return (
+      <SubgroupDetail
+        subgroupId={selectedSubgroupId}
+        occasionId={occasionId}
+        onBack={() => setSelectedSubgroupId(null)}
+        onUpdate={loadData}
+      />
+    )
+  }
+
   return (
-    <Card>
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
       <BlockStack gap="400">
-        <Text as="h2" variant="headingLg">People Management</Text>
-        
-        <BlockStack gap="200">
-          <InlineStack gap="200">
-            <div style={{ flex: 1 }}>
-              <TextField
-                label="Add Person"
-                value={newPersonName}
-                onChange={setNewPersonName}
-                placeholder="Enter person's name"
-                autoComplete="off"
-              />
-            </div>
-            <div style={{ paddingTop: '1.5rem' }}>
-              <Button onClick={handleAddPerson} loading={adding} disabled={!newPersonName.trim()}>
-                Add Person
-              </Button>
-            </div>
-          </InlineStack>
-        </BlockStack>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text as="h2" variant="headingLg">People</Text>
+          <Button variant="primary" onClick={() => setAddPersonModalOpen(true)}>
+            Add Person
+          </Button>
+        </div>
 
-        {people.length > 0 ? (
-          <s-section padding="none">
-            <s-table>
-            <s-table-header-row>
-              <s-table-header>Name</s-table-header>
-              <s-table-header>Subgroup</s-table-header>
-              <s-table-header>Actions</s-table-header>
-            </s-table-header-row>
-            <s-table-body>
-              {people.map(person => {
-                const subgroup = getSubgroupForPerson(person.id)
-                return (
-                  <s-table-row key={person.id}>
-                    <s-table-cell>{person.name}</s-table-cell>
-                    <s-table-cell>
-                      {subgroup ? (
-                        <Text as="span" tone="subdued">{subgroup.name}</Text>
-                      ) : (
-                        <Text as="span" tone="subdued">-</Text>
-                      )}
-                    </s-table-cell>
-                    <s-table-cell>
-                      <Button onClick={() => openDeleteModal(person.id)} tone="critical" size="slim">
-                        Remove
-                      </Button>
-                    </s-table-cell>
-                  </s-table-row>
-                )
-              })}
-            </s-table-body>
-            </s-table>
-          </s-section>
-        ) : (
-          <Text as="p" tone="subdued">No people added yet. Add someone to get started!</Text>
-        )}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '16px'
+        }}>
+          <Card>
+            <BlockStack gap="200">
+              <Text as="p" variant="bodySm" tone="subdued">Total People</Text>
+              <Text as="h3" variant="headingXl">{people.length}</Text>
+            </BlockStack>
+          </Card>
+        </div>
 
-        <BlockStack gap="200">
-          <InlineStack align="space-between" blockAlign="center">
-            <Text as="h3" variant="headingMd">Subgroups</Text>
-            <Button onClick={() => openSubgroupModal()} size="slim">Create Subgroup</Button>
-          </InlineStack>
-          {subgroups.length > 0 ? (
-            <s-section padding="none">
-              <s-table>
-              <s-table-header-row>
-                <s-table-header>Name</s-table-header>
-                <s-table-header>Members</s-table-header>
-                <s-table-header>Actions</s-table-header>
-              </s-table-header-row>
-              <s-table-body>
-                {subgroups.map(subgroup => {
-                  const members = subgroupMembers
-                    .filter(sm => sm.subgroup_id === subgroup.id)
-                    .map(sm => people.find(p => p.id === sm.person_id))
-                    .filter(Boolean)
-                    .map(p => p!.name)
-                  
-                  return (
-                    <s-table-row key={subgroup.id}>
-                      <s-table-cell>{subgroup.name}</s-table-cell>
-                      <s-table-cell>{members.join(', ')}</s-table-cell>
-                      <s-table-cell>
-                        <InlineStack gap="100">
-                          <Button onClick={() => openSubgroupModal(subgroup)} size="slim">Edit</Button>
-                          <Button onClick={() => openDeleteSubgroupModal(subgroup.id)} tone="critical" size="slim">Delete</Button>
-                        </InlineStack>
-                      </s-table-cell>
-                    </s-table-row>
-                  )
-                })}
-              </s-table-body>
-              </s-table>
-            </s-section>
-          ) : (
-            <Text as="p" tone="subdued">No subgroups created yet. Create one to group people together!</Text>
-          )}
-        </BlockStack>
+        <Card>
+          <BlockStack gap="400">
+            <TextField
+              label=""
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search people"
+              autoComplete="off"
+              clearButton
+              onClearButtonClick={() => setSearchQuery('')}
+            />
+
+            {filteredPeople.length > 0 ? (
+              <s-section padding="none">
+                <s-table>
+                  <s-table-body>
+                    {filteredPeople.map((person) => {
+                      const subgroup = getSubgroupForPerson(person.id)
+                      return (
+                        <s-table-row 
+                          key={person.id}
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => setSelectedPersonId(person.id)}
+                        >
+                          <s-table-cell>
+                            <BlockStack gap="100">
+                              <Text as="p" variant="bodyMd" fontWeight="semibold">
+                                {person.name}
+                              </Text>
+                              {subgroup && (
+                                <div>
+                                  <Badge tone="info">{subgroup.name}</Badge>
+                                </div>
+                              )}
+                            </BlockStack>
+                          </s-table-cell>
+                          <s-table-cell>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7.5 15L12.5 10L7.5 5" stroke="#8C9196" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                          </s-table-cell>
+                        </s-table-row>
+                      )
+                    })}
+                  </s-table-body>
+                </s-table>
+              </s-section>
+            ) : (
+              <div style={{ padding: '32px', textAlign: 'center' }}>
+                <Text as="p" tone="subdued">{searchQuery ? 'No people found' : 'No people added yet. Add someone to get started!'}</Text>
+              </div>
+            )}
+          </BlockStack>
+        </Card>}
+
+        <Card>
+          <BlockStack gap="400">
+            <InlineStack align="space-between" blockAlign="center">
+              <Text as="h3" variant="headingMd">Subgroups</Text>
+              <Button onClick={() => openSubgroupModal()} size="slim">Create Subgroup</Button>
+            </InlineStack>
+            {subgroups.length > 0 ? (
+              <s-section padding="none">
+                <s-table>
+                  <s-table-body>
+                    {subgroups.map((subgroup) => {
+                      const members = subgroupMembers
+                        .filter(sm => sm.subgroup_id === subgroup.id)
+                        .map(sm => people.find(p => p.id === sm.person_id))
+                        .filter(Boolean)
+                        .map(p => p!.name)
+                      
+                      return (
+                        <s-table-row 
+                          key={subgroup.id}
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => setSelectedSubgroupId(subgroup.id)}
+                        >
+                          <s-table-cell>
+                            <BlockStack gap="100">
+                              <Text as="p" variant="bodyMd" fontWeight="semibold">
+                                {subgroup.name}
+                              </Text>
+                              <Text as="p" variant="bodySm" tone="subdued">
+                                {members.length} {members.length === 1 ? 'member' : 'members'} · {members.join(', ')}
+                              </Text>
+                            </BlockStack>
+                          </s-table-cell>
+                          <s-table-cell>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7.5 15L12.5 10L7.5 5" stroke="#8C9196" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                          </s-table-cell>
+                        </s-table-row>
+                      )
+                    })}
+                  </s-table-body>
+                </s-table>
+              </s-section>
+            ) : (
+              <div style={{ padding: '32px', textAlign: 'center' }}>
+                <Text as="p" tone="subdued">No subgroups created yet. Create one to group people together!</Text>
+              </div>
+            )}
+          </BlockStack>
+        </Card>
       </BlockStack>
+
+      <Modal
+        open={addPersonModalOpen}
+        onClose={() => setAddPersonModalOpen(false)}
+        title="Add Person"
+        primaryAction={{
+          content: 'Add',
+          onAction: handleAddPerson,
+          loading: adding,
+          disabled: !newPersonName.trim()
+        }}
+        secondaryActions={[
+          {
+            content: 'Cancel',
+            onAction: () => setAddPersonModalOpen(false)
+          }
+        ]}
+      >
+        <Modal.Section>
+          <TextField
+            label="Name"
+            value={newPersonName}
+            onChange={setNewPersonName}
+            placeholder="Enter person's name"
+            autoComplete="off"
+          />
+        </Modal.Section>
+      </Modal>
       
       <Modal
         open={deleteModalOpen}
@@ -437,6 +530,6 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
           <Text as="p">Are you sure you want to delete this subgroup? This action cannot be undone.</Text>
         </Modal.Section>
       </Modal>
-    </Card>
+    </div>
   )
 }
