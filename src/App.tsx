@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { AppProvider, Text, ActionList, Popover, TextField } from '@shopify/polaris'
+import { AppProvider, Text, ActionList, Popover, TextField, Icon } from '@shopify/polaris'
+import { HomeFilledIcon, OrderFilledIcon, ProductFilledIcon, PersonFilledIcon, TargetFilledIcon, ReceiptIcon, BankFilledIcon, ChartVerticalFilledIcon } from '@shopify/polaris-icons'
 import { Search } from 'lucide-react'
 import { supabase, type Occasion } from './lib/supabase'
 import Dashboard from './components/Dashboard'
@@ -78,11 +79,11 @@ function App() {
   ]
 
   const navigationItems = [
-    { label: 'Dashboard', icon: 'home', onClick: () => setSelectedTab(0) },
-    { label: 'People', icon: 'customers', onClick: () => setSelectedTab(1) },
-    { label: 'Expenses', icon: 'receipt', onClick: () => setSelectedTab(2) },
-    { label: 'Balances', icon: 'finances', onClick: () => setSelectedTab(3) },
-    { label: 'Statistics', icon: 'chart-vertical', onClick: () => setSelectedTab(4) }
+    { label: 'Dashboard', icon: HomeFilledIcon, onClick: () => setSelectedTab(0) },
+    { label: 'People', icon: PersonFilledIcon, onClick: () => setSelectedTab(1) },
+    { label: 'Expenses', icon: ReceiptIcon, onClick: () => setSelectedTab(2) },
+    { label: 'Balances', icon: BankFilledIcon, onClick: () => setSelectedTab(3) },
+    { label: 'Statistics', icon: ChartVerticalFilledIcon, onClick: () => setSelectedTab(4) }
   ]
 
   return (
@@ -167,8 +168,8 @@ function App() {
         <div style={{ display: 'flex', flex: 1, marginTop: '56px' }}>
           <div style={{
             width: '224px',
-            backgroundColor: '#f9fafb',
-            borderRight: '1px solid #e1e3e5',
+            backgroundColor: '#f1f2f3',
+            borderRight: '1px solid #d2d5d8',
             display: 'flex',
             flexDirection: 'column',
             position: 'fixed',
@@ -181,90 +182,64 @@ function App() {
               <ul style={{
                 listStyle: 'none',
                 margin: 0,
-                padding: '8px'
+                padding: '8px 12px'
               }}>
                 {navigationItems.map((item, index) => (
-                  <li key={item.label} style={{ marginBottom: 0 }}>
+                  <li key={item.label} style={{ marginBottom: '4px' }}>
                     <div style={{ position: 'relative' }}>
-                      <div style={{
-                        position: 'relative',
-                        ...(selectedTab === index && {
-                          '::before': {
-                            content: '""',
-                            position: 'absolute',
-                            left: 0,
-                            top: 0,
-                            bottom: 0,
-                            width: '3px',
-                            backgroundColor: '#2c6ecb',
-                            borderRadius: '0 2px 2px 0'
+                      <a
+                        onClick={(e) => {
+                          e.preventDefault()
+                          item.onClick()
+                        }}
+                        href="#"
+                        tabIndex={0}
+                        aria-disabled="false"
+                        style={{
+                          all: 'unset',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '6px 8px',
+                          minHeight: '32px',
+                          borderRadius: '8px',
+                          background: selectedTab === index ? '#ffffff' : 'transparent',
+                          cursor: 'pointer',
+                          textDecoration: 'none',
+                          boxSizing: 'border-box',
+                          position: 'relative',
+                          transition: 'background-color 0.2s ease',
+                          width: '100%',
+                          boxShadow: selectedTab === index ? '0 1px 0 0 rgba(0,0,0,.05), 0 -1px 0 0 rgba(0,0,0,.05)' : 'none'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (selectedTab !== index) {
+                            e.currentTarget.style.background = '#e3e5e7'
                           }
-                        })
-                      }}>
-                        <a
-                          onClick={(e) => {
-                            e.preventDefault()
-                            item.onClick()
-                          }}
-                          href="#"
-                          tabIndex={0}
-                          aria-disabled="false"
-                          style={{
-                            all: 'unset',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            padding: '10px 8px',
-                            borderRadius: '8px',
-                            background: selectedTab === index ? '#e3e5e7' : 'transparent',
-                            color: '#202223',
-                            cursor: 'pointer',
-                            textDecoration: 'none',
-                            boxSizing: 'border-box',
-                            position: 'relative',
-                            transition: 'background-color 0.2s ease',
-                            width: '100%'
-                          }}
-                          onMouseEnter={(e) => {
-                            if (selectedTab !== index) {
-                              e.currentTarget.style.background = '#f1f2f3'
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (selectedTab !== index) {
-                              e.currentTarget.style.background = 'transparent'
-                            }
-                          }}
-                        >
-                          {selectedTab === index && (
-                            <div style={{
-                              position: 'absolute',
-                              left: 0,
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              width: '3px',
-                              height: '24px',
-                              backgroundColor: '#2c6ecb',
-                              borderRadius: '0 2px 2px 0'
-                            }} />
-                          )}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '20px',
-                            height: '20px'
-                          }}>
-                            <s-icon type={item.icon} size="small" color={selectedTab === index ? 'base' : 'subdued'} />
-                          </div>
-                          <span style={{
-                            fontSize: '14px',
-                            fontWeight: selectedTab === index ? 600 : 500,
-                            color: '#303030',
-                            lineHeight: '20px'
-                          }}>{item.label}</span>
-                        </a>
-                      </div>
+                        }}
+                        onMouseLeave={(e) => {
+                          if (selectedTab !== index) {
+                            e.currentTarget.style.background = 'transparent'
+                          }
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '20px',
+                          height: '20px',
+                          flexShrink: 0
+                        }}>
+                          <Icon source={item.icon} tone="base" />
+                        </div>
+                        <span style={{
+                          fontSize: '13px',
+                          fontWeight: selectedTab === index ? 600 : 400,
+                          color: '#202223',
+                          lineHeight: '20px'
+                        }}>{item.label}</span>
+                      </a>
                     </div>
                   </li>
                 ))}
