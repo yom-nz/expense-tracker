@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { AppProvider, Frame, TopBar, InlineStack, Text } from '@shopify/polaris'
+import { AppProvider, Frame, TopBar, Text, ActionList, Popover } from '@shopify/polaris'
+import { DollarSign } from 'lucide-react'
 import { supabase, type Occasion } from './lib/supabase'
 import Dashboard from './components/Dashboard'
 import OccasionSelector from './components/OccasionSelector'
@@ -8,6 +9,9 @@ function App() {
   const [occasions, setOccasions] = useState<Occasion[]>([])
   const [currentOccasion, setCurrentOccasion] = useState<Occasion | null>(null)
   const [loading, setLoading] = useState(true)
+  const [selectedTab, setSelectedTab] = useState(0)
+  const [occasionPopoverActive, setOccasionPopoverActive] = useState(false)
+  const [createModalOpen, setCreateModalOpen] = useState(false)
 
   useEffect(() => {
     loadOccasions()
@@ -41,18 +45,106 @@ function App() {
 
   const handleOccasionCreated = () => {
     loadOccasions()
+    setCreateModalOpen(false)
   }
+
+  const toggleOccasionPopover = () => {
+    setOccasionPopoverActive(!occasionPopoverActive)
+  }
+
+  const occasionPickerActivator = (
+    <button
+      onClick={toggleOccasionPopover}
+      style={{
+        background: 'transparent',
+        border: 'none',
+        padding: '8px 16px',
+        cursor: 'pointer',
+        color: 'white',
+        fontSize: '14px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px'
+      }}
+    >
+      {currentOccasion?.name || 'Select Occasion'}
+      <span style={{ fontSize: '10px' }}>▼</span>
+    </button>
+  )
+
+  const occasionActions = [
+    {
+      items: occasions.map(occasion => ({
+        content: occasion.name,
+        active: currentOccasion?.id === occasion.id,
+        onAction: () => {
+          handleOccasionChange(occasion.id)
+          setOccasionPopoverActive(false)
+        }
+      }))
+    },
+    {
+      items: [
+        {
+          content: 'Create New Occasion',
+          onAction: () => {
+            setOccasionPopoverActive(false)
+            setCreateModalOpen(true)
+          }
+        }
+      ]
+    }
+  ]
+
+  const navigationItems = [
+    { label: 'Dashboard', onClick: () => setSelectedTab(0) },
+    { label: 'People', onClick: () => setSelectedTab(1) },
+    { label: 'Expenses', onClick: () => setSelectedTab(2) },
+    { label: 'Balances', onClick: () => setSelectedTab(3) },
+    { label: 'Statistics', onClick: () => setSelectedTab(4) }
+  ]
 
   const topBarMarkup = (
     <TopBar
       showNavigationToggle={false}
-    />
+      secondaryMenu={
+        <Popover
+          active={occasionPopoverActive}
+          activator={occasionPickerActivator}
+          onClose={toggleOccasionPopover}
+          preferredAlignment="right"
+        >
+          <ActionList sections={occasionActions} />
+        </Popover>
+      }
+    >
+      <div style={{ display: 'flex', gap: '16px', marginLeft: '16px' }}>
+        {navigationItems.map((item, index) => (
+          <button
+            key={item.label}
+            onClick={item.onClick}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: '8px 12px',
+              cursor: 'pointer',
+              color: selectedTab === index ? 'white' : 'rgba(255, 255, 255, 0.7)',
+              fontSize: '14px',
+              fontWeight: selectedTab === index ? 600 : 400,
+              borderBottom: selectedTab === index ? '2px solid white' : '2px solid transparent'
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </TopBar>
   )
 
   const logo = {
-    width: 40,
-    topBarSource: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect width="40" height="40" fill="%23008060"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="white" font-size="20" font-weight="bold"%3EE%3C/text%3E%3C/svg%3E',
-    contextualSaveBarSource: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect width="40" height="40" fill="%23008060"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="white" font-size="20" font-weight="bold"%3EE%3C/text%3E%3C/svg%3E',
+    width: 200,
+    topBarSource: '',
+    contextualSaveBarSource: '',
     url: '/',
     accessibilityLabel: 'Expense Tracker',
   }
@@ -61,27 +153,19 @@ function App() {
     <AppProvider i18n={{}}>
       <Frame
         topBar={topBarMarkup}
-        logo={logo}
+        logo={{
+          ...logo,
+          topBarSource: (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white', fontSize: '16px', fontWeight: 600 }}>
+              <DollarSign size={24} />
+              <span>Expense Tracker</span>
+            </div>
+          ) as any
+        }}
       >
         <div style={{ padding: '1rem' }}>
-          <InlineStack align="space-between" blockAlign="center" gap="400">
-            <Text as="h1" variant="headingXl">Expense Tracker</Text>
-            {currentOccasion && (
-              <Text as="p" variant="bodyMd" tone="subdued">{currentOccasion.name}</Text>
-            )}
-          </InlineStack>
-
-          <div style={{ marginTop: '1rem' }}>
-            <OccasionSelector
-              occasions={occasions}
-              currentOccasion={currentOccasion}
-              onOccasionChange={handleOccasionChange}
-              onOccasionCreated={handleOccasionCreated}
-            />
-          </div>
-          
           {!loading && currentOccasion && (
-            <Dashboard occasionId={currentOccasion.id} />
+            <Dashboard occasionId={currentOccasion.id} selectedTab={selectedTab} onTabChange={setSelectedTab} />
           )}
           
           {!loading && !currentOccasion && (
@@ -90,6 +174,15 @@ function App() {
             </div>
           )}
         </div>
+
+        <OccasionSelector
+          occasions={occasions}
+          currentOccasion={currentOccasion}
+          onOccasionChange={handleOccasionChange}
+          onOccasionCreated={handleOccasionCreated}
+          isOpen={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
+        />
       </Frame>
     </AppProvider>
   )

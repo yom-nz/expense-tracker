@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, Select, Button, Modal, TextField, InlineStack } from '@shopify/polaris'
+import { Modal, TextField } from '@shopify/polaris'
 import { supabase, type Occasion } from '../lib/supabase'
 
 interface Props {
@@ -7,10 +7,11 @@ interface Props {
   currentOccasion: Occasion | null
   onOccasionChange: (occasionId: string) => void
   onOccasionCreated: () => void
+  isOpen: boolean
+  onClose: () => void
 }
 
-export default function OccasionSelector({ occasions, currentOccasion, onOccasionChange, onOccasionCreated }: Props) {
-  const [isModalOpen, setIsModalOpen] = useState(false)
+export default function OccasionSelector({ occasions, currentOccasion, onOccasionChange, onOccasionCreated, isOpen, onClose }: Props) {
   const [newOccasionName, setNewOccasionName] = useState('')
   const [creating, setCreating] = useState(false)
 
@@ -26,8 +27,8 @@ export default function OccasionSelector({ occasions, currentOccasion, onOccasio
       if (error) throw error
 
       setNewOccasionName('')
-      setIsModalOpen(false)
       onOccasionCreated()
+      onClose()
     } catch (error) {
       console.error('Error creating occasion:', error)
     } finally {
@@ -35,30 +36,10 @@ export default function OccasionSelector({ occasions, currentOccasion, onOccasio
     }
   }
 
-  const options = occasions.map(c => ({
-    label: c.name,
-    value: c.id
-  }))
-
   return (
-    <>
-      <Card>
-        <InlineStack gap="400" align="space-between" blockAlign="center">
-          <div style={{ flex: 1, maxWidth: '400px' }}>
-            <Select
-              label="Occasion"
-              options={options}
-              value={currentOccasion?.id || ''}
-              onChange={onOccasionChange}
-            />
-          </div>
-          <Button onClick={() => setIsModalOpen(true)}>New Occasion</Button>
-        </InlineStack>
-      </Card>
-
-      <Modal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+    <Modal
+        open={isOpen}
+        onClose={onClose}
         title="Create New Occasion"
         primaryAction={{
           content: 'Create',
@@ -69,7 +50,7 @@ export default function OccasionSelector({ occasions, currentOccasion, onOccasio
         secondaryActions={[
           {
             content: 'Cancel',
-            onAction: () => setIsModalOpen(false)
+            onAction: onClose
           }
         ]}
       >
@@ -83,6 +64,5 @@ export default function OccasionSelector({ occasions, currentOccasion, onOccasio
           />
         </Modal.Section>
       </Modal>
-    </>
   )
 }

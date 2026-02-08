@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, Text, InlineStack, BlockStack, Tabs, Button } from '@shopify/polaris'
+import { Card, Text, InlineStack, BlockStack, Button } from '@shopify/polaris'
 import { supabase, type Person, type Expense, type Settlement } from '../lib/supabase'
 import PeopleManager from './PeopleManager'
 import ExpenseManager from './ExpenseManager'
@@ -8,10 +8,11 @@ import StatsView from './StatsView'
 
 interface Props {
   occasionId: string
+  selectedTab: number
+  onTabChange: (tab: number) => void
 }
 
-export default function Dashboard({ occasionId }: Props) {
-  const [selected, setSelected] = useState(0)
+export default function Dashboard({ occasionId, selectedTab, onTabChange }: Props) {
   const [people, setPeople] = useState<Person[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [settlements, setSettlements] = useState<Settlement[]>([])
@@ -80,38 +81,10 @@ export default function Dashboard({ occasionId }: Props) {
     }
   }
 
-  const tabs = [
-    {
-      id: 'dashboard',
-      content: 'Dashboard',
-      panelID: 'dashboard-panel'
-    },
-    {
-      id: 'people',
-      content: 'People & Subgroups',
-      panelID: 'people-panel'
-    },
-    {
-      id: 'expenses',
-      content: 'Expenses',
-      panelID: 'expenses-panel'
-    },
-    {
-      id: 'balances',
-      content: 'Balances',
-      panelID: 'balances-panel'
-    },
-    {
-      id: 'stats',
-      content: 'Statistics',
-      panelID: 'stats-panel'
-    }
-  ]
 
   return (
-    <div style={{ marginTop: '1rem' }}>
-      <Tabs tabs={tabs} selected={selected} onSelect={setSelected}>
-        {selected === 0 && (
+    <div>
+        {selectedTab === 0 && (
           <Card>
             <BlockStack gap="400">
               <Text as="h2" variant="headingLg">Quick Stats</Text>
@@ -130,20 +103,20 @@ export default function Dashboard({ occasionId }: Props) {
               <BlockStack gap="200">
                 <Text as="h3" variant="headingMd">Quick Actions</Text>
                 <InlineStack gap="200">
-                  <Button variant="primary" tone="success" onClick={() => setSelected(2)}>Add Expense</Button>
-                  <Button variant="primary" tone="success" onClick={() => setSelected(1)}>Manage People</Button>
-                  <Button variant="primary" tone="success" onClick={() => setSelected(3)}>View Balances</Button>
+                  <Button variant="primary" tone="success" onClick={() => onTabChange(2)}>Add Expense</Button>
+                  <Button variant="primary" tone="success" onClick={() => onTabChange(1)}>Manage People</Button>
+                  <Button variant="primary" tone="success" onClick={() => onTabChange(3)}>View Balances</Button>
                 </InlineStack>
               </BlockStack>
             </BlockStack>
           </Card>
         )}
         
-        {selected === 1 && (
+        {selectedTab === 1 && (
           <PeopleManager occasionId={occasionId} onUpdate={loadPeople} />
         )}
         
-        {selected === 2 && (
+        {selectedTab === 2 && (
           <ExpenseManager 
             occasionId={occasionId} 
             people={people}
@@ -151,7 +124,7 @@ export default function Dashboard({ occasionId }: Props) {
           />
         )}
         
-        {selected === 3 && (
+        {selectedTab === 3 && (
           <BalancesView 
             occasionId={occasionId}
             people={people}
@@ -161,10 +134,9 @@ export default function Dashboard({ occasionId }: Props) {
           />
         )}
         
-        {selected === 4 && (
+        {selectedTab === 4 && (
           <StatsView expenses={expenses} people={people} />
         )}
-      </Tabs>
     </div>
   )
 }
