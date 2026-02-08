@@ -149,19 +149,29 @@ export default function BalancesView({ occasionId, people, expenses, settlements
 
           <BlockStack gap="200">
             <Text as="h3" variant="headingMd">Individual Balances</Text>
-            {balances.map(balance => (
-              <InlineStack key={balance.personId} align="space-between" blockAlign="center">
-                <Text as="p">{balance.personName}</Text>
-                <Text 
-                  as="p" 
-                  variant="bodyLg"
-                  tone={balance.balance > 0.01 ? 'success' : balance.balance < -0.01 ? 'critical' : undefined}
-                >
-                  {balance.balance > 0.01 ? '+' : ''}{balance.balance < -0.01 ? '-' : ''}$
-                  {Math.abs(balance.balance).toFixed(2)}
-                </Text>
-              </InlineStack>
-            ))}
+            <s-table>
+              <s-table-header-row>
+                <s-table-header>Person</s-table-header>
+                <s-table-header format="currency">Balance</s-table-header>
+              </s-table-header-row>
+              <s-table-body>
+                {balances.map(balance => (
+                  <s-table-row key={balance.personId}>
+                    <s-table-cell>{balance.personName}</s-table-cell>
+                    <s-table-cell>
+                      <Text 
+                        as="span" 
+                        variant="bodyLg"
+                        tone={balance.balance > 0.01 ? 'success' : balance.balance < -0.01 ? 'critical' : undefined}
+                      >
+                        {balance.balance > 0.01 ? '+' : ''}{balance.balance < -0.01 ? '-' : ''}$
+                        {Math.abs(balance.balance).toFixed(2)}
+                      </Text>
+                    </s-table-cell>
+                  </s-table-row>
+                ))}
+              </s-table-body>
+            </s-table>
           </BlockStack>
 
           {suggestions.length > 0 && (

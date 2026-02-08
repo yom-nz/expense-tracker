@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, TextField, Button, Select, BlockStack, InlineStack, Text, DataTable, Modal, Checkbox } from '@shopify/polaris'
+import { Card, TextField, Button, Select, BlockStack, InlineStack, Text, Modal, Checkbox } from '@shopify/polaris'
 import { supabase, type Person, type Expense, type ExpenseSplit } from '../lib/supabase'
 
 interface Props {
@@ -157,27 +157,6 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
 
   const payerOptions = people.map(p => ({ label: p.name, value: p.id }))
 
-  const rows = expenses.map(expense => {
-    const payer = people.find(p => p.id === expense.payer_person_id)
-    const expenseSplits = splits[expense.id] || []
-    const splitWith = expenseSplits
-      .map(s => people.find(p => p.id === s.person_id)?.name)
-      .filter(Boolean)
-      .join(', ')
-
-    return [
-      new Date(expense.date).toLocaleDateString(),
-      payer?.name || 'Unknown',
-      `$${Number(expense.amount).toFixed(2)}`,
-      expense.description,
-      expense.category,
-      splitWith,
-      <Button key={expense.id} onClick={() => openDeleteModal(expense.id)} tone="critical" size="slim">
-        Delete
-      </Button>
-    ]
-  })
-
   return (
     <>
       <Card>
@@ -188,11 +167,43 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
           </InlineStack>
 
           {expenses.length > 0 ? (
-            <DataTable
-              columnContentTypes={['text', 'text', 'numeric', 'text', 'text', 'text', 'text']}
-              headings={['Date', 'Payer', 'Amount', 'Description', 'Category', 'Split With', 'Actions']}
-              rows={rows}
-            />
+            <s-table>
+              <s-table-header-row>
+                <s-table-header>Date</s-table-header>
+                <s-table-header>Payer</s-table-header>
+                <s-table-header format="currency">Amount</s-table-header>
+                <s-table-header>Description</s-table-header>
+                <s-table-header>Category</s-table-header>
+                <s-table-header>Split With</s-table-header>
+                <s-table-header>Actions</s-table-header>
+              </s-table-header-row>
+              <s-table-body>
+                {expenses.map(expense => {
+                  const payer = people.find(p => p.id === expense.payer_person_id)
+                  const expenseSplits = splits[expense.id] || []
+                  const splitWith = expenseSplits
+                    .map(s => people.find(p => p.id === s.person_id)?.name)
+                    .filter(Boolean)
+                    .join(', ')
+                  
+                  return (
+                    <s-table-row key={expense.id}>
+                      <s-table-cell>{new Date(expense.date).toLocaleDateString()}</s-table-cell>
+                      <s-table-cell>{payer?.name || 'Unknown'}</s-table-cell>
+                      <s-table-cell>${Number(expense.amount).toFixed(2)}</s-table-cell>
+                      <s-table-cell>{expense.description}</s-table-cell>
+                      <s-table-cell>{expense.category}</s-table-cell>
+                      <s-table-cell>{splitWith}</s-table-cell>
+                      <s-table-cell>
+                        <Button onClick={() => openDeleteModal(expense.id)} tone="critical" size="slim">
+                          Delete
+                        </Button>
+                      </s-table-cell>
+                    </s-table-row>
+                  )
+                })}
+              </s-table-body>
+            </s-table>
           ) : (
             <Text as="p" tone="subdued">No expenses yet. Add an expense to get started!</Text>
           )}

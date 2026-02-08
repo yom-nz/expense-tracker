@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, TextField, Button, List, InlineStack, BlockStack, Text, Modal, Checkbox } from '@shopify/polaris'
+import { Card, TextField, Button, InlineStack, BlockStack, Text, Modal, Checkbox } from '@shopify/polaris'
 import { supabase, type Person, type Subgroup, type SubgroupMember } from '../lib/supabase'
 
 interface Props {
@@ -274,24 +274,35 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
         </BlockStack>
 
         {people.length > 0 ? (
-          <List type="bullet">
-            {people.map(person => {
-              const subgroup = getSubgroupForPerson(person.id)
-              return (
-                <List.Item key={person.id}>
-                  <InlineStack gap="200" align="space-between" blockAlign="center">
-                    <Text as="span">
-                      {person.name}
-                      {subgroup && <Text as="span" tone="subdued"> (part of {subgroup.name})</Text>}
-                    </Text>
-                    <Button onClick={() => openDeleteModal(person.id)} tone="critical" size="slim">
-                      Remove
-                    </Button>
-                  </InlineStack>
-                </List.Item>
-              )
-            })}
-          </List>
+          <s-table>
+            <s-table-header-row>
+              <s-table-header>Name</s-table-header>
+              <s-table-header>Subgroup</s-table-header>
+              <s-table-header>Actions</s-table-header>
+            </s-table-header-row>
+            <s-table-body>
+              {people.map(person => {
+                const subgroup = getSubgroupForPerson(person.id)
+                return (
+                  <s-table-row key={person.id}>
+                    <s-table-cell>{person.name}</s-table-cell>
+                    <s-table-cell>
+                      {subgroup ? (
+                        <Text as="span" tone="subdued">{subgroup.name}</Text>
+                      ) : (
+                        <Text as="span" tone="subdued">-</Text>
+                      )}
+                    </s-table-cell>
+                    <s-table-cell>
+                      <Button onClick={() => openDeleteModal(person.id)} tone="critical" size="slim">
+                        Remove
+                      </Button>
+                    </s-table-cell>
+                  </s-table-row>
+                )
+              })}
+            </s-table-body>
+          </s-table>
         ) : (
           <Text as="p" tone="subdued">No people added yet. Add someone to get started!</Text>
         )}
@@ -302,29 +313,35 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
             <Button onClick={() => openSubgroupModal()} size="slim">Create Subgroup</Button>
           </InlineStack>
           {subgroups.length > 0 ? (
-            <List type="bullet">
-              {subgroups.map(subgroup => {
-                const members = subgroupMembers
-                  .filter(sm => sm.subgroup_id === subgroup.id)
-                  .map(sm => people.find(p => p.id === sm.person_id))
-                  .filter(Boolean)
-                  .map(p => p!.name)
-                
-                return (
-                  <List.Item key={subgroup.id}>
-                    <InlineStack gap="200" align="space-between" blockAlign="center">
-                      <Text as="span">
-                        {subgroup.name}: {members.join(', ')}
-                      </Text>
-                      <InlineStack gap="100">
-                        <Button onClick={() => openSubgroupModal(subgroup)} size="slim">Edit</Button>
-                        <Button onClick={() => openDeleteSubgroupModal(subgroup.id)} tone="critical" size="slim">Delete</Button>
-                      </InlineStack>
-                    </InlineStack>
-                  </List.Item>
-                )
-              })}
-            </List>
+            <s-table>
+              <s-table-header-row>
+                <s-table-header>Name</s-table-header>
+                <s-table-header>Members</s-table-header>
+                <s-table-header>Actions</s-table-header>
+              </s-table-header-row>
+              <s-table-body>
+                {subgroups.map(subgroup => {
+                  const members = subgroupMembers
+                    .filter(sm => sm.subgroup_id === subgroup.id)
+                    .map(sm => people.find(p => p.id === sm.person_id))
+                    .filter(Boolean)
+                    .map(p => p!.name)
+                  
+                  return (
+                    <s-table-row key={subgroup.id}>
+                      <s-table-cell>{subgroup.name}</s-table-cell>
+                      <s-table-cell>{members.join(', ')}</s-table-cell>
+                      <s-table-cell>
+                        <InlineStack gap="100">
+                          <Button onClick={() => openSubgroupModal(subgroup)} size="slim">Edit</Button>
+                          <Button onClick={() => openDeleteSubgroupModal(subgroup.id)} tone="critical" size="slim">Delete</Button>
+                        </InlineStack>
+                      </s-table-cell>
+                    </s-table-row>
+                  )
+                })}
+              </s-table-body>
+            </s-table>
           ) : (
             <Text as="p" tone="subdued">No subgroups created yet. Create one to group people together!</Text>
           )}
