@@ -2,6 +2,20 @@ import { useState, useEffect } from 'react'
 import { Card, TextField, Button, Select, BlockStack, InlineStack, Text, Modal, Checkbox } from '@shopify/polaris'
 import { supabase, type Person, type Expense, type ExpenseSplit } from '../lib/supabase'
 
+const EXPENSE_CATEGORIES = [
+  { label: 'Accommodation', value: 'accommodation' },
+  { label: 'Activities', value: 'activities' },
+  { label: 'Entertainment', value: 'entertainment' },
+  { label: 'Food & Dining', value: 'food' },
+  { label: 'Gifts', value: 'gifts' },
+  { label: 'Groceries', value: 'groceries' },
+  { label: 'Healthcare', value: 'healthcare' },
+  { label: 'Other', value: 'other' },
+  { label: 'Shopping', value: 'shopping' },
+  { label: 'Transportation', value: 'transportation' },
+  { label: 'Utilities', value: 'utilities' }
+]
+
 interface Props {
   occasionId: string
   people: Person[]
@@ -17,7 +31,7 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
     payer: '',
     amount: '',
     description: '',
-    category: 'general',
+    category: 'food',
     note: ''
   })
   const [selectedPeople, setSelectedPeople] = useState<Set<string>>(new Set())
@@ -99,7 +113,7 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
         payer: '',
         amount: '',
         description: '',
-        category: 'general',
+        category: 'food',
         note: ''
       })
       setSelectedPeople(new Set())
@@ -167,7 +181,8 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
           </InlineStack>
 
           {expenses.length > 0 ? (
-            <s-table>
+            <s-section padding="none">
+              <s-table>
               <s-table-header-row>
                 <s-table-header>Date</s-table-header>
                 <s-table-header>Payer</s-table-header>
@@ -189,10 +204,10 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
                   return (
                     <s-table-row key={expense.id}>
                       <s-table-cell>{new Date(expense.date).toLocaleDateString()}</s-table-cell>
-                      <s-table-cell>{payer?.name || 'Unknown'}</s-table-cell>
+                      <s-table-cell><s-chip>{payer?.name || 'Unknown'}</s-chip></s-table-cell>
                       <s-table-cell>${Number(expense.amount).toFixed(2)}</s-table-cell>
                       <s-table-cell>{expense.description}</s-table-cell>
-                      <s-table-cell>{expense.category}</s-table-cell>
+                      <s-table-cell><s-chip color="strong">{expense.category}</s-chip></s-table-cell>
                       <s-table-cell>{splitWith}</s-table-cell>
                       <s-table-cell>
                         <Button onClick={() => openDeleteModal(expense.id)} tone="critical" size="slim">
@@ -203,7 +218,8 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
                   )
                 })}
               </s-table-body>
-            </s-table>
+              </s-table>
+            </s-section>
           ) : (
             <Text as="p" tone="subdued">No expenses yet. Add an expense to get started!</Text>
           )}
@@ -275,12 +291,11 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
               autoComplete="off"
             />
             
-            <TextField
+            <Select
               label="Category"
+              options={EXPENSE_CATEGORIES}
               value={newExpense.category}
               onChange={(value) => setNewExpense({ ...newExpense, category: value })}
-              placeholder="e.g., food, accommodation, transport"
-              autoComplete="off"
             />
             
             <TextField

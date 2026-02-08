@@ -274,7 +274,8 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
         </BlockStack>
 
         {people.length > 0 ? (
-          <s-table>
+          <s-section padding="none">
+            <s-table>
             <s-table-header-row>
               <s-table-header>Name</s-table-header>
               <s-table-header>Subgroup</s-table-header>
@@ -302,7 +303,8 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
                 )
               })}
             </s-table-body>
-          </s-table>
+            </s-table>
+          </s-section>
         ) : (
           <Text as="p" tone="subdued">No people added yet. Add someone to get started!</Text>
         )}
@@ -313,7 +315,8 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
             <Button onClick={() => openSubgroupModal()} size="slim">Create Subgroup</Button>
           </InlineStack>
           {subgroups.length > 0 ? (
-            <s-table>
+            <s-section padding="none">
+              <s-table>
               <s-table-header-row>
                 <s-table-header>Name</s-table-header>
                 <s-table-header>Members</s-table-header>
@@ -341,7 +344,8 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
                   )
                 })}
               </s-table-body>
-            </s-table>
+              </s-table>
+            </s-section>
           ) : (
             <Text as="p" tone="subdued">No subgroups created yet. Create one to group people together!</Text>
           )}
