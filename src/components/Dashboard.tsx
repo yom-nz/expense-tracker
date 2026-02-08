@@ -85,35 +85,140 @@ export default function Dashboard({ occasionId, selectedTab, onTabChange }: Prop
   return (
     <div>
         {selectedTab === 0 && (
-          <Card>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
             <BlockStack gap="400">
-              <Text as="h2" variant="headingLg">Quick Stats</Text>
-              <InlineStack gap="400">
-                <Card>
-                  <Text as="p" variant="bodyLg">{people.length} People</Text>
-                </Card>
-                <Card>
-                  <Text as="p" variant="bodyLg">{expenses.length} Expenses</Text>
-                </Card>
-                <Card>
-                  <Text as="p" variant="bodyLg">${stats.totalSpent.toFixed(2)} Total</Text>
-                </Card>
-              </InlineStack>
-              
-              <BlockStack gap="200">
-                <Text as="h3" variant="headingMd">Quick Actions</Text>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text as="h2" variant="headingLg">Dashboard</Text>
                 <InlineStack gap="200">
-                  <Button variant="primary" tone="success" onClick={() => onTabChange(2)}>Add Expense</Button>
-                  <Button variant="primary" tone="success" onClick={() => onTabChange(1)}>Manage People</Button>
-                  <Button variant="primary" tone="success" onClick={() => onTabChange(3)}>View Balances</Button>
+                  <Button variant="primary" onClick={() => onTabChange(2)}>Add Expense</Button>
+                  <Button variant="primary" onClick={() => onTabChange(1)}>Manage People</Button>
                 </InlineStack>
-              </BlockStack>
+              </div>
+
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(3, 1fr)', 
+              gap: '16px'
+            }}>
+              <Card>
+                <BlockStack gap="200">
+                  <Text as="p" variant="bodySm" tone="subdued">People</Text>
+                  <Text as="h3" variant="headingXl">{people.length}</Text>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Text as="span" variant="bodySm" tone="success">↑ {people.length > 0 ? '100%' : '0%'}</Text>
+                  </div>
+                </BlockStack>
+              </Card>
+
+              <Card>
+                <BlockStack gap="200">
+                  <Text as="p" variant="bodySm" tone="subdued">Total Expenses</Text>
+                  <Text as="h3" variant="headingXl">${stats.totalSpent.toFixed(2)}</Text>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Text as="span" variant="bodySm" tone="success">↑ {expenses.length > 0 ? '100%' : '0%'}</Text>
+                  </div>
+                </BlockStack>
+              </Card>
+
+              <Card>
+                <BlockStack gap="200">
+                  <Text as="p" variant="bodySm" tone="subdued">Number of Expenses</Text>
+                  <Text as="h3" variant="headingXl">{expenses.length}</Text>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Text as="span" variant="bodySm" tone="subdued">Total tracked</Text>
+                  </div>
+                </BlockStack>
+              </Card>
+            </div>
+
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(2, 1fr)', 
+              gap: '16px'
+            }}>
+              <Card>
+                <BlockStack gap="300">
+                  <Text as="h3" variant="headingMd">Recent Expenses</Text>
+                  {expenses.slice(0, 3).length > 0 ? (
+                    <BlockStack gap="100">
+                      {expenses.slice(0, 3).map(exp => (
+                        <button
+                          key={exp.id}
+                          onClick={() => onTabChange(2)}
+                          style={{
+                            all: 'unset',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '12px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            transition: 'background-color 0.2s',
+                            width: '100%',
+                            boxSizing: 'border-box'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f6f6f7'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <div>
+                            <Text as="p" variant="bodyMd" fontWeight="semibold">{exp.description}</Text>
+                            <Text as="p" variant="bodySm" tone="subdued">{exp.category}</Text>
+                          </div>
+                          <Text as="p" variant="bodyMd" fontWeight="semibold">${Number(exp.amount).toFixed(2)}</Text>
+                        </button>
+                      ))}
+                    </BlockStack>
+                  ) : (
+                    <Text as="p" tone="subdued">No expenses yet</Text>
+                  )}
+                </BlockStack>
+              </Card>
+
+              <Card>
+                <BlockStack gap="300">
+                  <Text as="h3" variant="headingMd">Top Spenders</Text>
+                  {people.slice(0, 3).length > 0 ? (
+                    <BlockStack gap="100">
+                      {people.slice(0, 3).map(person => {
+                        const personExpenses = expenses.filter(e => e.payer_person_id === person.id)
+                        const total = personExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0)
+                        return (
+                          <button
+                            key={person.id}
+                            onClick={() => onTabChange(1)}
+                            style={{
+                              all: 'unset',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              padding: '12px',
+                              borderRadius: '8px',
+                              cursor: 'pointer',
+                              transition: 'background-color 0.2s',
+                              width: '100%',
+                              boxSizing: 'border-box'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f6f6f7'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                          >
+                            <Text as="p" variant="bodyMd">{person.name}</Text>
+                            <Text as="p" variant="bodyMd" fontWeight="semibold">${total.toFixed(2)}</Text>
+                          </button>
+                        )
+                      })}
+                    </BlockStack>
+                  ) : (
+                    <Text as="p" tone="subdued">No people yet</Text>
+                  )}
+                </BlockStack>
+              </Card>
+            </div>
             </BlockStack>
-          </Card>
+          </div>
         )}
         
         {selectedTab === 1 && (
-          <PeopleManager occasionId={occasionId} onUpdate={loadPeople} />
+          <PeopleManager occasionId={occasionId} onUpdate={loadData} />
         )}
         
         {selectedTab === 2 && (
