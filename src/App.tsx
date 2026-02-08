@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { AppProvider, Frame, TopBar, Text, ActionList, Popover } from '@shopify/polaris'
+import { AppProvider, Text, ActionList, Popover } from '@shopify/polaris'
 import { DollarSign } from 'lucide-react'
 import { supabase, type Occasion } from './lib/supabase'
 import Dashboard from './components/Dashboard'
@@ -52,26 +52,6 @@ function App() {
     setOccasionPopoverActive(!occasionPopoverActive)
   }
 
-  const occasionPickerActivator = (
-    <button
-      onClick={toggleOccasionPopover}
-      style={{
-        background: 'transparent',
-        border: 'none',
-        padding: '8px 16px',
-        cursor: 'pointer',
-        color: 'white',
-        fontSize: '14px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '4px'
-      }}
-    >
-      {currentOccasion?.name || 'Select Occasion'}
-      <span style={{ fontSize: '10px' }}>▼</span>
-    </button>
-  )
-
   const occasionActions = [
     {
       items: occasions.map(occasion => ({
@@ -104,76 +84,111 @@ function App() {
     { label: 'Statistics', onClick: () => setSelectedTab(4) }
   ]
 
-  const topBarMarkup = (
-    <TopBar
-      showNavigationToggle={false}
-      secondaryMenu={
-        <Popover
-          active={occasionPopoverActive}
-          activator={occasionPickerActivator}
-          onClose={toggleOccasionPopover}
-          preferredAlignment="right"
-        >
-          <ActionList sections={occasionActions} />
-        </Popover>
-      }
-    />
-  )
-
-  const logo = {
-    width: 200,
-    topBarSource: '',
-    contextualSaveBarSource: '',
-    url: '/',
-    accessibilityLabel: 'Expense Tracker',
-  }
-
   return (
     <AppProvider i18n={{}}>
-      <Frame
-        topBar={topBarMarkup}
-        logo={{
-          ...logo,
-          topBarSource: (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white', fontSize: '16px', fontWeight: 600 }}>
-              <DollarSign size={24} />
-              <span>Expense Tracker</span>
-            </div>
-          ) as any
-        }}
-      >
-        <div style={{ padding: '1rem' }}>
-          <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', borderBottom: '1px solid #e0e0e0', paddingBottom: '8px' }}>
+      <div style={{ display: 'flex', height: '100vh' }}>
+        <div style={{
+          width: '240px',
+          backgroundColor: '#f9fafb',
+          borderRight: '1px solid #e5e7eb',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <div style={{
+            padding: '20px 16px',
+            borderBottom: '1px solid #e5e7eb',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <DollarSign size={24} color="#008060" />
+            <span style={{ fontSize: '18px', fontWeight: 600, color: '#202223' }}>Expense Tracker</span>
+          </div>
+
+          <nav style={{ flex: 1, padding: '16px 8px' }}>
             {navigationItems.map((item, index) => (
               <button
                 key={item.label}
                 onClick={item.onClick}
                 style={{
-                  background: 'transparent',
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '10px 12px',
+                  marginBottom: '4px',
                   border: 'none',
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  color: selectedTab === index ? '#008060' : '#6b7280',
+                  borderRadius: '8px',
+                  background: selectedTab === index ? '#f1f1f1' : 'transparent',
+                  color: selectedTab === index ? '#202223' : '#6d7175',
                   fontSize: '14px',
                   fontWeight: selectedTab === index ? 600 : 400,
-                  borderBottom: selectedTab === index ? '2px solid #008060' : '2px solid transparent',
-                  marginBottom: '-10px'
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (selectedTab !== index) {
+                    e.currentTarget.style.background = '#f6f6f7'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (selectedTab !== index) {
+                    e.currentTarget.style.background = 'transparent'
+                  }
                 }}
               >
                 {item.label}
               </button>
             ))}
-          </div>
+          </nav>
 
-          {!loading && currentOccasion && (
-            <Dashboard occasionId={currentOccasion.id} selectedTab={selectedTab} onTabChange={setSelectedTab} />
-          )}
-          
-          {!loading && !currentOccasion && (
-            <div style={{ marginTop: '2rem' }}>
-              <Text as="p">Create an occasion to get started!</Text>
-            </div>
-          )}
+          <div style={{
+            padding: '16px',
+            borderTop: '1px solid #e5e7eb'
+          }}>
+            <Popover
+              active={occasionPopoverActive}
+              activator={
+                <button
+                  onClick={toggleOccasionPopover}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    background: 'white',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    color: '#202223',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}
+                >
+                  <span style={{ fontWeight: 500 }}>{currentOccasion?.name || 'Select Occasion'}</span>
+                  <span style={{ fontSize: '10px' }}>▼</span>
+                </button>
+              }
+              onClose={toggleOccasionPopover}
+              preferredAlignment="right"
+            >
+              <ActionList sections={occasionActions} />
+            </Popover>
+          </div>
+        </div>
+
+        <div style={{ flex: 1, overflow: 'auto', backgroundColor: '#f9fafb' }}>
+          <div style={{ padding: '24px' }}>
+            {!loading && currentOccasion && (
+              <Dashboard occasionId={currentOccasion.id} selectedTab={selectedTab} onTabChange={setSelectedTab} />
+            )}
+            
+            {!loading && !currentOccasion && (
+              <div style={{ marginTop: '2rem' }}>
+                <Text as="p">Create an occasion to get started!</Text>
+              </div>
+            )}
+          </div>
         </div>
 
         <OccasionSelector
@@ -184,7 +199,7 @@ function App() {
           isOpen={createModalOpen}
           onClose={() => setCreateModalOpen(false)}
         />
-      </Frame>
+      </div>
     </AppProvider>
   )
 }
