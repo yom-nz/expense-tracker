@@ -117,28 +117,7 @@ function App() {
           <ActionList sections={occasionActions} />
         </Popover>
       }
-    >
-      <div style={{ display: 'flex', gap: '16px', marginLeft: '16px' }}>
-        {navigationItems.map((item, index) => (
-          <button
-            key={item.label}
-            onClick={item.onClick}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              padding: '8px 12px',
-              cursor: 'pointer',
-              color: selectedTab === index ? 'white' : 'rgba(255, 255, 255, 0.7)',
-              fontSize: '14px',
-              fontWeight: selectedTab === index ? 600 : 400,
-              borderBottom: selectedTab === index ? '2px solid white' : '2px solid transparent'
-            }}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-    </TopBar>
+    />
   )
 
   const logo = {
@@ -164,6 +143,28 @@ function App() {
         }}
       >
         <div style={{ padding: '1rem' }}>
+          <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', borderBottom: '1px solid #e0e0e0', paddingBottom: '8px' }}>
+            {navigationItems.map((item, index) => (
+              <button
+                key={item.label}
+                onClick={item.onClick}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  color: selectedTab === index ? '#008060' : '#6b7280',
+                  fontSize: '14px',
+                  fontWeight: selectedTab === index ? 600 : 400,
+                  borderBottom: selectedTab === index ? '2px solid #008060' : '2px solid transparent',
+                  marginBottom: '-10px'
+                }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
           {!loading && currentOccasion && (
             <Dashboard occasionId={currentOccasion.id} selectedTab={selectedTab} onTabChange={setSelectedTab} />
           )}

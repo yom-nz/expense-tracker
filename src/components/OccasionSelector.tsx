@@ -11,7 +11,7 @@ interface Props {
   onClose: () => void
 }
 
-export default function OccasionSelector({ occasions, currentOccasion, onOccasionChange, onOccasionCreated, isOpen, onClose }: Props) {
+export default function OccasionSelector({ onOccasionCreated, isOpen, onClose }: Props) {
   const [newOccasionName, setNewOccasionName] = useState('')
   const [creating, setCreating] = useState(false)
 
