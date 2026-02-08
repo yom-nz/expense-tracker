@@ -177,27 +177,31 @@ function App() {
             bottom: 0,
             overflowY: 'auto'
           }}>
-            <nav style={{ padding: '12px 8px' }}>
+            <nav style={{ padding: '8px' }}>
               {navigationItems.map((item, index) => (
-                <button
+                <a
                   key={item.label}
-                  onClick={item.onClick}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    item.onClick()
+                  }}
+                  href="#"
                   style={{
+                    all: 'unset',
                     width: '100%',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
-                    padding: '8px 12px',
-                    marginBottom: '2px',
-                    border: 'none',
+                    padding: '10px 8px',
+                    marginBottom: '4px',
                     borderRadius: '8px',
-                    background: selectedTab === index ? '#e4e5e7' : 'transparent',
+                    background: selectedTab === index ? '#e3e5e7' : 'transparent',
                     color: '#202223',
-                    fontSize: '13px',
-                    fontWeight: selectedTab === index ? 600 : 400,
                     cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.15s'
+                    textDecoration: 'none',
+                    boxSizing: 'border-box',
+                    position: 'relative',
+                    transition: 'background-color 0.2s ease'
                   }}
                   onMouseEnter={(e) => {
                     if (selectedTab !== index) {
@@ -210,9 +214,34 @@ function App() {
                     }
                   }}
                 >
-                  <s-icon type={item.icon} size="small" color={selectedTab === index ? 'base' : 'subdued'} />
-                  <span>{item.label}</span>
-                </button>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '20px',
+                    height: '20px'
+                  }}>
+                    <s-icon type={item.icon} size="small" color={selectedTab === index ? 'base' : 'subdued'} />
+                  </div>
+                  <span style={{
+                    fontSize: '14px',
+                    fontWeight: selectedTab === index ? 600 : 500,
+                    color: '#303030',
+                    lineHeight: '20px'
+                  }}>{item.label}</span>
+                  {selectedTab === index && (
+                    <div style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: '3px',
+                      height: '24px',
+                      backgroundColor: '#2c6ecb',
+                      borderRadius: '0 2px 2px 0'
+                    }} />
+                  )}
+                </a>
               ))}
             </nav>
           </div>
