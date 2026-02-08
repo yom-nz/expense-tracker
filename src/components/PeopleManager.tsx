@@ -326,7 +326,7 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
                       return (
                         <s-table-row 
                           key={person.id}
-                          style={{ cursor: 'pointer' }}
+                          interactive
                           onClick={() => setSelectedPersonId(person.id)}
                         >
                           <s-table-cell>
@@ -382,7 +382,7 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
                       return (
                         <s-table-row 
                           key={subgroup.id}
-                          style={{ cursor: 'pointer' }}
+                          interactive
                           onClick={() => setSelectedSubgroupId(subgroup.id)}
                         >
                           <s-table-cell>

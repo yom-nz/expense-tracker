@@ -589,7 +589,32 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
                 {subgroups.length > 0 ? (
                   <InlineStack gap="200">
                     {subgroups.map(subgroup => (
-                      <Badge key={subgroup.id} tone="info">{subgroup.name}</Badge>
+                      <button
+                        key={subgroup.id}
+                        onClick={async (e) => {
+                          e.stopPropagation()
+                          try {
+                            const { error } = await supabase
+                              .from('subgroup_members')
+                              .delete()
+                              .eq('subgroup_id', subgroup.id)
+                              .eq('person_id', personId)
+
+                            if (error) throw error
+
+                            loadData()
+                            onUpdate?.()
+                          } catch (error) {
+                            console.error('Error removing from subgroup:', error)
+                          }
+                        }}
+                        style={{
+                          all: 'unset',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Badge key={subgroup.id} tone="info">{subgroup.name}</Badge>
+                      </button>
                     ))}
                   </InlineStack>
                 ) : (
