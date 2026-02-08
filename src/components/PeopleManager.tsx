@@ -360,7 +360,7 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
               </div>
             )}
           </BlockStack>
-        </Card>}
+        </Card>
 
         <Card>
           <BlockStack gap="400">
