@@ -230,27 +230,36 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
                     const expenseSplits = splits[expense.id] || []
                     
                     return (
-                      <s-table-row 
-                        key={expense.id}
-                        onClick={() => setSelectedExpenseId(expense.id)}
-                      >
+                      <s-table-row key={expense.id}>
                         <s-table-cell>
-                          {new Date(expense.date).toLocaleDateString()}
+                          <div style={{cursor: 'pointer'}} onClick={() => setSelectedExpenseId(expense.id)}>
+                            {new Date(expense.date).toLocaleDateString()}
+                          </div>
                         </s-table-cell>
                         <s-table-cell>
-                          <Text as="span" fontWeight="semibold">{expense.description}</Text>
+                          <div style={{cursor: 'pointer'}} onClick={() => setSelectedExpenseId(expense.id)}>
+                            <Text as="span" fontWeight="semibold">{expense.description}</Text>
+                          </div>
                         </s-table-cell>
                         <s-table-cell>
-                          <s-chip>{payer?.name || 'Unknown'}</s-chip>
+                          <div style={{cursor: 'pointer'}} onClick={() => setSelectedExpenseId(expense.id)}>
+                            <s-chip>{payer?.name || 'Unknown'}</s-chip>
+                          </div>
                         </s-table-cell>
                         <s-table-cell>
-                          <s-chip color="strong">{expense.category}</s-chip>
+                          <div style={{cursor: 'pointer'}} onClick={() => setSelectedExpenseId(expense.id)}>
+                            <s-chip color="strong">{expense.category}</s-chip>
+                          </div>
                         </s-table-cell>
                         <s-table-cell>
-                          {expenseSplits.length} {expenseSplits.length === 1 ? 'person' : 'people'}
+                          <div style={{cursor: 'pointer'}} onClick={() => setSelectedExpenseId(expense.id)}>
+                            {expenseSplits.length} {expenseSplits.length === 1 ? 'person' : 'people'}
+                          </div>
                         </s-table-cell>
                         <s-table-cell>
-                          ${Number(expense.amount).toFixed(2)}
+                          <div style={{cursor: 'pointer'}} onClick={() => setSelectedExpenseId(expense.id)}>
+                            ${Number(expense.amount).toFixed(2)}
+                          </div>
                         </s-table-cell>
                       </s-table-row>
                     )

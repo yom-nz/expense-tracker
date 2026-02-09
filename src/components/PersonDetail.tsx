@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Card, Text, BlockStack, InlineStack, Button, TextField, Badge, Modal, Select, Checkbox } from '@shopify/polaris'
-import { supabase, type Person, type Expense, type Settlement, type ExpenseSplit, type Subgroup, type SubgroupMember } from '../lib/supabase'
+import { supabase, type Person, type Expense, type Settlement, type ExpenseSplit, type Subgroup } from '../lib/supabase'
 
 const EXPENSE_CATEGORIES = [
   { label: 'Accommodation', value: 'accommodation' },
@@ -208,12 +208,6 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
       .eq('occasion_id', occasionId)
 
     if (subgroupsError) throw subgroupsError
-
-    const { data: membersData, error: membersError } = await supabase
-      .from('subgroup_members')
-      .select('*')
-
-    if (membersError) throw membersError
 
     setAllSubgroups(subgroupsData || [])
   }

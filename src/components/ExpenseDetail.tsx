@@ -146,7 +146,7 @@ export default function ExpenseDetail({ expenseId, occasionId, onBack, onUpdate 
   const handleEditToggle = () => {
     if (isEditing && expense) {
       setEditForm({
-        payer: expense.payer_person_id,
+        payer: expense.payer_person_id || '',
         amount: expense.amount.toString(),
         description: expense.description,
         category: expense.category,

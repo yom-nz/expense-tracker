@@ -12,7 +12,6 @@ function App() {
   const [currentOccasion, setCurrentOccasion] = useState<Occasion | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedTab, setSelectedTab] = useState(0)
-  const [occasionPopoverActive, setOccasionPopoverActive] = useState(false)
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [searchModalOpen, setSearchModalOpen] = useState(false)
 

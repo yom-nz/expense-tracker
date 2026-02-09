@@ -341,19 +341,20 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
                     {filteredPeople.map((person) => {
                       const subgroup = getSubgroupForPerson(person.id)
                       return (
-                        <s-table-row
-                          key={person.id}
-                          onClick={() => setSelectedPersonId(person.id)}
-                        >
+                        <s-table-row key={person.id}>
                           <s-table-cell>
-                            <Text as="span" fontWeight="semibold">{person.name}</Text>
+                            <div style={{cursor: 'pointer'}} onClick={() => setSelectedPersonId(person.id)}>
+                              <Text as="span" fontWeight="semibold">{person.name}</Text>
+                            </div>
                           </s-table-cell>
                           <s-table-cell>
-                            {subgroup ? (
-                              <Badge tone="info">{subgroup.name}</Badge>
-                            ) : (
-                              <Text as="span" tone="subdued">No subgroup</Text>
-                            )}
+                            <div style={{cursor: 'pointer'}} onClick={() => setSelectedPersonId(person.id)}>
+                              {subgroup ? (
+                                <Badge tone="info">{subgroup.name}</Badge>
+                              ) : (
+                                <Text as="span" tone="subdued">No subgroup</Text>
+                              )}
+                            </div>
                           </s-table-cell>
                         </s-table-row>
                       )
@@ -392,18 +393,21 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
                         .map(p => p!.name)
                       
                       return (
-                        <s-table-row
-                          key={subgroup.id}
-                          onClick={() => setSelectedSubgroupId(subgroup.id)}
-                        >
+                        <s-table-row key={subgroup.id}>
                           <s-table-cell>
-                            <Text as="span" fontWeight="semibold">{subgroup.name}</Text>
+                            <div style={{cursor: 'pointer'}} onClick={() => setSelectedSubgroupId(subgroup.id)}>
+                              <Text as="span" fontWeight="semibold">{subgroup.name}</Text>
+                            </div>
                           </s-table-cell>
                           <s-table-cell>
-                            {members.length} {members.length === 1 ? 'member' : 'members'}
+                            <div style={{cursor: 'pointer'}} onClick={() => setSelectedSubgroupId(subgroup.id)}>
+                              {members.length} {members.length === 1 ? 'member' : 'members'}
+                            </div>
                           </s-table-cell>
                           <s-table-cell>
-                            <Text as="span" tone="subdued">{members.join(', ')}</Text>
+                            <div style={{cursor: 'pointer'}} onClick={() => setSelectedSubgroupId(subgroup.id)}>
+                              <Text as="span" tone="subdued">{members.join(', ')}</Text>
+                            </div>
                           </s-table-cell>
                         </s-table-row>
                       )
