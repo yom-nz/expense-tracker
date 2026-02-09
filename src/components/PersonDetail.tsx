@@ -619,6 +619,7 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
                     {subgroups.map(subgroup => (
                       <s-clickablechip
                         key={subgroup.id}
+                        size="base"
                         removable
                         onClick={() => {
                           setSubgroupToRemove(subgroup)
