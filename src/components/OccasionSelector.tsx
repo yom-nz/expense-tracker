@@ -55,8 +55,7 @@ export default function OccasionSelector({ onOccasionCreated, isOpen, onClose }:
           content: 'Create',
           onAction: handleCreateOccasion,
           loading: creating,
-          disabled: !newOccasionName.trim(),
-          tone: 'success'
+          disabled: !newOccasionName.trim()
         }}
         secondaryActions={[
           {

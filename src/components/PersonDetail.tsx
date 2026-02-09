@@ -51,7 +51,6 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
   const [allPeople, setAllPeople] = useState<Person[]>([])  
   const [expenseSplits, setExpenseSplits] = useState<Record<string, ExpenseSplit[]>>({})
   const [allSubgroups, setAllSubgroups] = useState<Subgroup[]>([])
-  const [allSubgroupMembers, setAllSubgroupMembers] = useState<SubgroupMember[]>([])
   
   const [addExpenseModalOpen, setAddExpenseModalOpen] = useState(false)
   const [addSettlementModalOpen, setAddSettlementModalOpen] = useState(false)
@@ -217,18 +216,9 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
     if (membersError) throw membersError
 
     setAllSubgroups(subgroupsData || [])
-    setAllSubgroupMembers(membersData || [])
   }
 
   const calculateStats = async () => {
-    const { data: allSplits, error } = await supabase
-      .from('expense_splits')
-      .select('*')
-
-    if (error) {
-      console.error('Error loading splits:', error)
-      return
-    }
 
     let totalPaid = 0
     let totalOwing = 0
@@ -565,7 +555,7 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
                                 <Text as="span" fontWeight="semibold">{expense.description}</Text>
                               </s-table-cell>
                               <s-table-cell>
-                                <s-chip tone="strong">{expense.category}</s-chip>
+                                <s-chip color="strong">{expense.category}</s-chip>
                               </s-table-cell>
                               <s-table-cell>
                                 ${Number(expense.amount).toFixed(2)}
@@ -574,7 +564,7 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
                                 {isPayer ? (
                                   <Badge tone="success">Paid</Badge>
                                 ) : personSplit ? (
-                                  <Badge tone="attention">Split (${Number(personSplit.amount).toFixed(2)})</Badge>
+                                  <Badge tone="attention">{`Split ($${Number(personSplit.amount).toFixed(2)})`}</Badge>
                                 ) : null}
                               </s-table-cell>
                             </s-table-row>
@@ -712,8 +702,7 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
           content: 'Add Expense',
           onAction: handleAddExpense,
           loading: addingExpense,
-          disabled: !newExpense.amount || !newExpense.description || selectedPeople.size === 0,
-          tone: 'success'
+          disabled: !newExpense.amount || !newExpense.description || selectedPeople.size === 0
         }}
         secondaryActions={[
           {
@@ -782,8 +771,7 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
           content: 'Add Settlement',
           onAction: handleAddSettlement,
           loading: addingSettlement,
-          disabled: !newSettlement.to || !newSettlement.amount,
-          tone: 'success'
+          disabled: !newSettlement.to || !newSettlement.amount
         }}
         secondaryActions={[
           {
@@ -822,8 +810,7 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
         primaryAction={{
           content: 'Update Subgroups',
           onAction: handleUpdateSubgroups,
-          loading: updatingSubgroups,
-          tone: 'success'
+          loading: updatingSubgroups
         }}
         secondaryActions={[
           {

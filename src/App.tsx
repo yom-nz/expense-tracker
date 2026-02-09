@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { AppProvider, Text, ActionList, Popover, TextField, Icon } from '@shopify/polaris'
-import { HomeFilledIcon, OrderFilledIcon, ProductFilledIcon, PersonFilledIcon, TargetFilledIcon, ReceiptIcon, BankFilledIcon, ChartVerticalFilledIcon, SearchIcon, SettingsFilledIcon } from '@shopify/polaris-icons'
+import { AppProvider, Text, Icon } from '@shopify/polaris'
+import { HomeFilledIcon, PersonFilledIcon, ReceiptIcon, BankFilledIcon, ChartVerticalFilledIcon, SearchIcon, SettingsFilledIcon } from '@shopify/polaris-icons'
 import { supabase, type Occasion } from './lib/supabase'
 import Dashboard from './components/Dashboard'
 import OccasionSelector from './components/OccasionSelector'
@@ -63,33 +63,6 @@ function App() {
     setCreateModalOpen(false)
   }
 
-  const toggleOccasionPopover = () => {
-    setOccasionPopoverActive(!occasionPopoverActive)
-  }
-
-  const occasionActions = [
-    {
-      items: occasions.map(occasion => ({
-        content: occasion.name,
-        active: currentOccasion?.id === occasion.id,
-        onAction: () => {
-          handleOccasionChange(occasion.id)
-          setOccasionPopoverActive(false)
-        }
-      }))
-    },
-    {
-      items: [
-        {
-          content: 'Create New Occasion',
-          onAction: () => {
-            setOccasionPopoverActive(false)
-            setCreateModalOpen(true)
-          }
-        }
-      ]
-    }
-  ]
 
   const navigationItems = [
     { label: 'Dashboard', icon: HomeFilledIcon, onClick: () => setSelectedTab(0) },
@@ -171,19 +144,8 @@ function App() {
           </div>
 
           <div style={{ position: 'absolute', right: '16px' }}>
-            <s-button commandFor="occasion-menu" style={{
-              padding: '8px 12px',
-              borderRadius: '8px',
-              background: 'rgba(255, 255, 255, 0.08)',
-              cursor: 'pointer',
-              fontSize: '14px',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              border: 'none'
-            }}>
-              <span>{currentOccasion?.icon || '📅'} {currentOccasion?.name || 'Select Occasion'}</span>
+            <s-button commandFor="occasion-menu">
+              <span>{currentOccasion?.name || 'Select Occasion'}</span>
             </s-button>
 
             <s-menu id="occasion-menu" accessibilityLabel="Occasion menu">
@@ -193,7 +155,7 @@ function App() {
                     key={occasion.id}
                     onClick={() => handleOccasionChange(occasion.id)}
                   >
-                    {(occasion.icon || '📅') + ' ' + occasion.name}
+                    {occasion.name}
                   </s-button>
                 ))}
               </s-section>

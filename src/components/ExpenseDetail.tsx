@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, Text, BlockStack, InlineStack, Button, TextField, Select, Modal, Checkbox, Banner } from '@shopify/polaris'
+import { Card, Text, BlockStack, InlineStack, Button, TextField, Select, Modal, Checkbox } from '@shopify/polaris'
 import { supabase, type Person, type Expense, type ExpenseSplit } from '../lib/supabase'
 
 const EXPENSE_CATEGORIES = [

@@ -136,11 +136,6 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
     }
   }
 
-  const openDeleteModal = (personId: string) => {
-    setPersonToDelete(personId)
-    setDeleteModalOpen(true)
-  }
-
   const getSubgroupForPerson = (personId: string) => {
     const membership = subgroupMembers.find(sm => sm.person_id === personId)
     if (!membership) return null
@@ -252,11 +247,6 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
     setSubgroupModalOpen(true)
   }
 
-  const openDeleteSubgroupModal = (subgroupId: string) => {
-    setSubgroupToDelete(subgroupId)
-    setDeleteSubgroupModalOpen(true)
-  }
-
   const toggleMember = (personId: string) => {
     const newSelected = new Set(selectedMembers)
     if (newSelected.has(personId)) {
@@ -353,7 +343,6 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
                       return (
                         <s-table-row
                           key={person.id}
-                          interactive
                           onClick={() => setSelectedPersonId(person.id)}
                         >
                           <s-table-cell>
@@ -405,7 +394,6 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
                       return (
                         <s-table-row
                           key={subgroup.id}
-                          interactive
                           onClick={() => setSelectedSubgroupId(subgroup.id)}
                         >
                           <s-table-cell>
@@ -440,8 +428,7 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
           content: 'Add',
           onAction: handleAddPerson,
           loading: adding,
-          disabled: !newPersonName.trim(),
-          tone: 'success'
+          disabled: !newPersonName.trim()
         }}
         secondaryActions={[
           {
@@ -491,8 +478,7 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
           content: editingSubgroup ? 'Update Subgroup' : 'Create Subgroup',
           onAction: handleCreateOrUpdateSubgroup,
           loading: creatingSubgroup,
-          disabled: !newSubgroupName.trim() || selectedMembers.size === 0,
-          tone: 'success'
+          disabled: !newSubgroupName.trim() || selectedMembers.size === 0
         }}
         secondaryActions={[
           {

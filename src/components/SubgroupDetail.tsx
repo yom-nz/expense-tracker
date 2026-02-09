@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Card, Text, BlockStack, InlineStack, Button, TextField, Badge, Modal, Select, Checkbox } from '@shopify/polaris'
-import { supabase, type Person, type Expense, type Settlement, type ExpenseSplit, type Subgroup, type SubgroupMember } from '../lib/supabase'
+import { Card, Text, BlockStack, InlineStack, Button, TextField, Modal, Select, Checkbox } from '@shopify/polaris'
+import { supabase, type Person, type Expense, type Settlement, type ExpenseSplit, type Subgroup } from '../lib/supabase'
 
 const EXPENSE_CATEGORIES = [
   { label: 'Accommodation', value: 'accommodation' },
@@ -202,7 +202,7 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
     let totalOwing = 0
 
     expenses.forEach(expense => {
-      if (memberIds.includes(expense.payer_person_id)) {
+      if (expense.payer_person_id && memberIds.includes(expense.payer_person_id)) {
         totalPaid += Number(expense.amount)
       }
 
@@ -218,10 +218,10 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
     let settlementsTo = 0
 
     settlements.forEach(settlement => {
-      if (memberIds.includes(settlement.from_person_id)) {
+      if (settlement.from_person_id && memberIds.includes(settlement.from_person_id)) {
         settlementsFrom += Number(settlement.amount)
       }
-      if (memberIds.includes(settlement.to_person_id)) {
+      if (settlement.to_person_id && memberIds.includes(settlement.to_person_id)) {
         settlementsTo += Number(settlement.amount)
       }
     })
@@ -231,7 +231,7 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
     setStats({
       totalPaid,
       balance,
-      expenseCount: expenses.filter(e => memberIds.includes(e.payer_person_id)).length,
+      expenseCount: expenses.filter(e => e.payer_person_id && memberIds.includes(e.payer_person_id)).length,
       memberCount: members.length
     })
   }
@@ -531,7 +531,7 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
                                 <Text as="span" fontWeight="semibold">{expense.description}</Text>
                               </s-table-cell>
                               <s-table-cell>
-                                <s-chip tone="strong">{expense.category}</s-chip>
+                                <s-chip color="strong">{expense.category}</s-chip>
                               </s-table-cell>
                               <s-table-cell>
                                 ${Number(expense.amount).toFixed(2)}
@@ -646,8 +646,7 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
           content: 'Add Expense',
           onAction: handleAddExpense,
           loading: addingExpense,
-          disabled: !newExpense.amount || !newExpense.description || selectedPeople.size === 0,
-          tone: 'success'
+          disabled: !newExpense.amount || !newExpense.description || selectedPeople.size === 0
         }}
         secondaryActions={[
           {
@@ -715,8 +714,7 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
         primaryAction={{
           content: 'Update Members',
           onAction: handleUpdateMembers,
-          loading: updatingMembers,
-          tone: 'success'
+          loading: updatingMembers
         }}
         secondaryActions={[
           {

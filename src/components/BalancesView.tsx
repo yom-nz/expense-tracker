@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, BlockStack, Text, InlineStack, Button, Modal, Select, TextField, List, Banner } from '@shopify/polaris'
+import { Card, BlockStack, Text, Button, Modal, Select, TextField, List } from '@shopify/polaris'
 import { supabase, type Person, type Expense, type Settlement } from '../lib/supabase'
 
 interface Props {
@@ -227,8 +227,7 @@ export default function BalancesView({ occasionId, people, expenses, settlements
           content: 'Record Settlement',
           onAction: handleAddSettlement,
           loading: adding,
-          disabled: !newSettlement.from || !newSettlement.to || !newSettlement.amount,
-          tone: 'success'
+          disabled: !newSettlement.from || !newSettlement.to || !newSettlement.amount
         }}
         secondaryActions={[
           {

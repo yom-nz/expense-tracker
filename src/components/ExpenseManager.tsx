@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, TextField, Button, Select, BlockStack, InlineStack, Text, Modal, Checkbox, Badge, Banner } from '@shopify/polaris'
+import { Card, TextField, Button, Select, BlockStack, Text, Modal, Checkbox } from '@shopify/polaris'
 import { supabase, type Person, type Expense, type ExpenseSplit } from '../lib/supabase'
 import ExpenseDetail from './ExpenseDetail'
 
@@ -232,7 +232,6 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
                     return (
                       <s-table-row 
                         key={expense.id}
-                        interactive
                         onClick={() => setSelectedExpenseId(expense.id)}
                       >
                         <s-table-cell>
@@ -245,7 +244,7 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
                           <s-chip>{payer?.name || 'Unknown'}</s-chip>
                         </s-table-cell>
                         <s-table-cell>
-                          <s-chip tone="strong">{expense.category}</s-chip>
+                          <s-chip color="strong">{expense.category}</s-chip>
                         </s-table-cell>
                         <s-table-cell>
                           {expenseSplits.length} {expenseSplits.length === 1 ? 'person' : 'people'}
@@ -276,8 +275,7 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
           content: 'Add Expense',
           onAction: handleAddExpense,
           loading: adding,
-          disabled: !newExpense.payer || !newExpense.amount || !newExpense.description || selectedPeople.size === 0,
-          tone: 'success'
+          disabled: !newExpense.payer || !newExpense.amount || !newExpense.description || selectedPeople.size === 0
         }}
         secondaryActions={[
           {

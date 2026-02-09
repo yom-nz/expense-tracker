@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Button, Text, Icon } from '@shopify/polaris'
+import { Text, Icon } from '@shopify/polaris'
 import { SearchIcon } from '@shopify/polaris-icons'
 import { supabase, type Person, type Expense, type Settlement, type Subgroup } from '../lib/supabase'
 
@@ -137,7 +137,7 @@ export default function SearchModal({ open, onClose, occasionId }: SearchModalPr
     setSearchQuery(value)
   }
 
-  const handleSelectResult = (result: SearchResult) => {
+  const handleSelectResult = (_result: SearchResult) => {
     if (searchQuery && !recentSearches.includes(searchQuery)) {
       const updated = [searchQuery, ...recentSearches].slice(0, 5)
       setRecentSearches(updated)

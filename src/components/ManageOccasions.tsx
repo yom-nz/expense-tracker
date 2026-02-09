@@ -86,7 +86,7 @@ export default function ManageOccasions({ occasions, currentOccasion, onUpdate, 
                   <s-table-row key={occasion.id}>
                     <s-table-cell>
                       <Text as="span" variant="bodyMd" fontWeight="semibold">
-                        {occasion.icon || '📅'}
+                        📅
                       </Text>
                     </s-table-cell>
                     <s-table-cell>
@@ -96,7 +96,7 @@ export default function ManageOccasions({ occasions, currentOccasion, onUpdate, 
                     </s-table-cell>
                     <s-table-cell>
                       <Text as="span" variant="bodyMd" tone="subdued">
-                        {occasion.description || '-'}
+                        -
                       </Text>
                     </s-table-cell>
                     <s-table-cell>
