@@ -139,13 +139,15 @@ export default function BalancesView({ occasionId, people, expenses, settlements
   const suggestions = getSuggestedSettlements()
 
   return (
-    <>
-      <Card>
-        <BlockStack gap="400">
-          <InlineStack align="space-between" blockAlign="center">
-            <Text as="h2" variant="headingLg">Balances</Text>
-            <Button onClick={() => setIsModalOpen(true)} variant="primary">Record Settlement</Button>
-          </InlineStack>
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <BlockStack gap="400">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text as="h2" variant="headingLg">Balances</Text>
+          <Button onClick={() => setIsModalOpen(true)} variant="primary">Record Settlement</Button>
+        </div>
+
+        <Card>
+          <BlockStack gap="400">
 
           <BlockStack gap="200">
             <Text as="h3" variant="headingMd">Individual Balances</Text>
@@ -196,8 +198,9 @@ export default function BalancesView({ occasionId, people, expenses, settlements
           {suggestions.length === 0 && (
             <Text as="p" tone="success">Everyone is settled up!</Text>
           )}
-        </BlockStack>
-      </Card>
+          </BlockStack>
+        </Card>
+      </BlockStack>
 
       <Modal
         open={isModalOpen}
@@ -243,6 +246,6 @@ export default function BalancesView({ occasionId, people, expenses, settlements
           </BlockStack>
         </Modal.Section>
       </Modal>
-    </>
+    </div>
   )
 }

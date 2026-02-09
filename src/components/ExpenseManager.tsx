@@ -172,13 +172,15 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
   const payerOptions = people.map(p => ({ label: p.name, value: p.id }))
 
   return (
-    <>
-      <Card>
-        <BlockStack gap="400">
-          <InlineStack align="space-between" blockAlign="center">
-            <Text as="h2" variant="headingLg">Expenses</Text>
-            <Button onClick={() => setIsModalOpen(true)} variant="primary">Add Expense</Button>
-          </InlineStack>
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <BlockStack gap="400">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text as="h2" variant="headingLg">Expenses</Text>
+          <Button onClick={() => setIsModalOpen(true)} variant="primary">Add Expense</Button>
+        </div>
+
+        <Card>
+          <BlockStack gap="400">
 
           {expenses.length > 0 ? (
             <s-section padding="none">
@@ -223,8 +225,9 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
           ) : (
             <Text as="p" tone="subdued">No expenses yet. Add an expense to get started!</Text>
           )}
-        </BlockStack>
-      </Card>
+          </BlockStack>
+        </Card>
+      </BlockStack>
 
       <Modal
         open={deleteModalOpen}
@@ -321,6 +324,6 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
           </BlockStack>
         </Modal.Section>
       </Modal>
-    </>
+    </div>
   )
 }

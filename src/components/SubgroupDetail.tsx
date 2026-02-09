@@ -64,6 +64,10 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
   
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  
+  const [removeMemberModalOpen, setRemoveMemberModalOpen] = useState(false)
+  const [memberToRemove, setMemberToRemove] = useState<Person | null>(null)
+  const [removingMember, setRemovingMember] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -371,6 +375,30 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
     }
   }
 
+  const handleRemoveMember = async () => {
+    if (!memberToRemove) return
+
+    setRemovingMember(true)
+    try {
+      const { error } = await supabase
+        .from('subgroup_members')
+        .delete()
+        .eq('subgroup_id', subgroupId)
+        .eq('person_id', memberToRemove.id)
+
+      if (error) throw error
+
+      setRemoveMemberModalOpen(false)
+      setMemberToRemove(null)
+      loadData()
+      onUpdate?.()
+    } catch (error) {
+      console.error('Error removing member:', error)
+    } finally {
+      setRemovingMember(false)
+    }
+  }
+
   if (loading || !subgroup) {
     return <div>Loading...</div>
   }
@@ -432,7 +460,18 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
                 {members.length > 0 ? (
                   <InlineStack gap="200">
                     {members.map(member => (
-                      <Badge key={member.id} tone="info">{member.name}</Badge>
+                      <s-clickable-chip
+                        key={member.id}
+                        color="strong"
+                        accessibilityLabel={`Remove ${member.name}`}
+                        removable
+                        onRemove={() => {
+                          setMemberToRemove(member)
+                          setRemoveMemberModalOpen(true)
+                        }}
+                      >
+                        {member.name}
+                      </s-clickable-chip>
                     ))}
                   </InlineStack>
                 ) : (
@@ -678,6 +717,40 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
             ) : (
               <Text as="p" tone="subdued">No people available. Add people first.</Text>
             )}
+          </BlockStack>
+        </Modal.Section>
+      </Modal>
+
+      <Modal
+        open={removeMemberModalOpen}
+        onClose={() => setRemoveMemberModalOpen(false)}
+        title="Remove Member"
+        primaryAction={{
+          content: 'Remove',
+          onAction: handleRemoveMember,
+          loading: removingMember,
+          destructive: true
+        }}
+        secondaryActions={[
+          {
+            content: 'Cancel',
+            onAction: () => setRemoveMemberModalOpen(false)
+          }
+        ]}
+      >
+        <Modal.Section>
+          <BlockStack gap="400">
+            <div style={{
+              padding: '12px 16px',
+              backgroundColor: '#FFF4E5',
+              border: '1px solid #FFD79D',
+              borderRadius: '8px'
+            }}>
+              <Text as="p" tone="caution">
+                {memberToRemove?.name} will be removed from "{subgroup.name}"
+              </Text>
+            </div>
+            <Text as="p">Are you sure you want to continue?</Text>
           </BlockStack>
         </Modal.Section>
       </Modal>

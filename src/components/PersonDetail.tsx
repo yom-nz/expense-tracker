@@ -617,17 +617,18 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
                 {subgroups.length > 0 ? (
                   <InlineStack gap="200">
                     {subgroups.map(subgroup => (
-                      <s-clickablechip
+                      <s-clickable-chip
                         key={subgroup.id}
-                        size="base"
+                        color="strong"
+                        accessibilityLabel={`Remove ${subgroup.name}`}
                         removable
-                        onClick={() => {
+                        onRemove={() => {
                           setSubgroupToRemove(subgroup)
                           setRemoveSubgroupModalOpen(true)
                         }}
                       >
                         {subgroup.name}
-                      </s-clickablechip>
+                      </s-clickable-chip>
                     ))}
                   </InlineStack>
                 ) : (

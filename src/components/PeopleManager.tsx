@@ -318,42 +318,36 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
             />
 
             {filteredPeople.length > 0 ? (
-              <s-section padding="none">
-                <s-table>
-                  <s-table-body>
-                    {filteredPeople.map((person) => {
-                      const subgroup = getSubgroupForPerson(person.id)
-                      return (
-                        <s-table-row 
-                          key={person.id}
-                          interactive
-                          onClick={() => setSelectedPersonId(person.id)}
-                        >
-                          <s-table-cell>
-                            <BlockStack gap="100">
-                              <Text as="p" variant="bodyMd" fontWeight="semibold">
-                                {person.name}
-                              </Text>
-                              {subgroup && (
-                                <div>
-                                  <Badge tone="info">{subgroup.name}</Badge>
-                                </div>
-                              )}
-                            </BlockStack>
-                          </s-table-cell>
-                          <s-table-cell>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M7.5 15L12.5 10L7.5 5" stroke="#8C9196" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
+              <BlockStack gap="200">
+                {filteredPeople.map((person) => {
+                  const subgroup = getSubgroupForPerson(person.id)
+                  return (
+                    <s-clickable
+                      key={person.id}
+                      background="base"
+                      padding="base"
+                      borderRadius="small"
+                      onClick={() => setSelectedPersonId(person.id)}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <BlockStack gap="100">
+                          <Text as="p" variant="bodyMd" fontWeight="semibold">
+                            {person.name}
+                          </Text>
+                          {subgroup && (
+                            <div>
+                              <Badge tone="info">{subgroup.name}</Badge>
                             </div>
-                          </s-table-cell>
-                        </s-table-row>
-                      )
-                    })}
-                  </s-table-body>
-                </s-table>
-              </s-section>
+                          )}
+                        </BlockStack>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7.5 15L12.5 10L7.5 5" stroke="#8C9196" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    </s-clickable>
+                  )
+                })}
+              </BlockStack>
             ) : (
               <div style={{ padding: '32px', textAlign: 'center' }}>
                 <Text as="p" tone="subdued">{searchQuery ? 'No people found' : 'No people added yet. Add someone to get started!'}</Text>
@@ -369,45 +363,39 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
               <Button onClick={() => openSubgroupModal()} size="slim">Create Subgroup</Button>
             </InlineStack>
             {subgroups.length > 0 ? (
-              <s-section padding="none">
-                <s-table>
-                  <s-table-body>
-                    {subgroups.map((subgroup) => {
-                      const members = subgroupMembers
-                        .filter(sm => sm.subgroup_id === subgroup.id)
-                        .map(sm => people.find(p => p.id === sm.person_id))
-                        .filter(Boolean)
-                        .map(p => p!.name)
-                      
-                      return (
-                        <s-table-row 
-                          key={subgroup.id}
-                          interactive
-                          onClick={() => setSelectedSubgroupId(subgroup.id)}
-                        >
-                          <s-table-cell>
-                            <BlockStack gap="100">
-                              <Text as="p" variant="bodyMd" fontWeight="semibold">
-                                {subgroup.name}
-                              </Text>
-                              <Text as="p" variant="bodySm" tone="subdued">
-                                {members.length} {members.length === 1 ? 'member' : 'members'} · {members.join(', ')}
-                              </Text>
-                            </BlockStack>
-                          </s-table-cell>
-                          <s-table-cell>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M7.5 15L12.5 10L7.5 5" stroke="#8C9196" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </div>
-                          </s-table-cell>
-                        </s-table-row>
-                      )
-                    })}
-                  </s-table-body>
-                </s-table>
-              </s-section>
+              <BlockStack gap="200">
+                {subgroups.map((subgroup) => {
+                  const members = subgroupMembers
+                    .filter(sm => sm.subgroup_id === subgroup.id)
+                    .map(sm => people.find(p => p.id === sm.person_id))
+                    .filter(Boolean)
+                    .map(p => p!.name)
+                  
+                  return (
+                    <s-clickable
+                      key={subgroup.id}
+                      background="base"
+                      padding="base"
+                      borderRadius="small"
+                      onClick={() => setSelectedSubgroupId(subgroup.id)}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <BlockStack gap="100">
+                          <Text as="p" variant="bodyMd" fontWeight="semibold">
+                            {subgroup.name}
+                          </Text>
+                          <Text as="p" variant="bodySm" tone="subdued">
+                            {members.length} {members.length === 1 ? 'member' : 'members'} · {members.join(', ')}
+                          </Text>
+                        </BlockStack>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7.5 15L12.5 10L7.5 5" stroke="#8C9196" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    </s-clickable>
+                  )
+                })}
+              </BlockStack>
             ) : (
               <div style={{ padding: '32px', textAlign: 'center' }}>
                 <Text as="p" tone="subdued">No subgroups created yet. Create one to group people together!</Text>

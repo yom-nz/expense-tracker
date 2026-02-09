@@ -49,10 +49,12 @@ export default function StatsView({ expenses, people }: Props) {
   }, [expenses, people])
 
   return (
-    <BlockStack gap="400">
-      <Card>
-        <BlockStack gap="400">
-          <Text as="h2" variant="headingLg">Statistics</Text>
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <BlockStack gap="400">
+        <Text as="h2" variant="headingLg">Statistics</Text>
+
+        <Card>
+          <BlockStack gap="400">
           
           <BlockStack gap="200">
             <Text as="p" variant="bodyLg">Total Expenses: {stats.numExpenses}</Text>
@@ -88,8 +90,9 @@ export default function StatsView({ expenses, people }: Props) {
           ) : (
             <Text as="p" tone="subdued">No expenses yet</Text>
           )}
-        </BlockStack>
-      </Card>
-    </BlockStack>
+          </BlockStack>
+        </Card>
+      </BlockStack>
+    </div>
   )
 }
