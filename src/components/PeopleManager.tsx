@@ -29,6 +29,9 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
   const [addPersonModalOpen, setAddPersonModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null)
+  
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [selectedSubgroupId, setSelectedSubgroupId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -97,10 +100,12 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
 
       setNewPersonName('')
       setAddPersonModalOpen(false)
+      setSuccessMessage('Person added successfully!')
       loadPeople()
       onUpdate()
     } catch (error) {
       console.error('Error adding person:', error)
+      setErrorMessage('Failed to add person. Please try again.')
     } finally {
       setAdding(false)
     }
@@ -120,10 +125,12 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
 
       setDeleteModalOpen(false)
       setPersonToDelete(null)
+      setSuccessMessage('Person removed successfully!')
       loadPeople()
       onUpdate()
     } catch (error) {
       console.error('Error removing person:', error)
+      setErrorMessage('Failed to remove person. Please try again.')
     } finally {
       setDeleting(false)
     }
@@ -195,9 +202,11 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
       setSelectedMembers(new Set())
       setSubgroupModalOpen(false)
       setEditingSubgroup(null)
+      setSuccessMessage(editingSubgroup ? 'Subgroup updated successfully!' : 'Subgroup created successfully!')
       loadData()
     } catch (error) {
       console.error('Error creating/updating subgroup:', error)
+      setErrorMessage(`Failed to ${editingSubgroup ? 'update' : 'create'} subgroup. Please try again.`)
     } finally {
       setCreatingSubgroup(false)
     }
@@ -217,9 +226,11 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
 
       setDeleteSubgroupModalOpen(false)
       setSubgroupToDelete(null)
+      setSuccessMessage('Subgroup deleted successfully!')
       loadData()
     } catch (error) {
       console.error('Error deleting subgroup:', error)
+      setErrorMessage('Failed to delete subgroup. Please try again.')
     } finally {
       setDeletingSubgroup(false)
     }
@@ -292,6 +303,18 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
           </Button>
         </div>
 
+        {successMessage && (
+          <s-banner heading="Changes saved" tone="success" dismissible={true} onDismiss={() => setSuccessMessage(null)}>
+            {successMessage}
+          </s-banner>
+        )}
+
+        {errorMessage && (
+          <s-banner heading="Failed to save changes" tone="critical" dismissible={true} onDismiss={() => setErrorMessage(null)}>
+            {errorMessage} Check your connection and try again.
+          </s-banner>
+        )}
+
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
@@ -318,36 +341,37 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
             />
 
             {filteredPeople.length > 0 ? (
-              <BlockStack gap="200">
-                {filteredPeople.map((person) => {
-                  const subgroup = getSubgroupForPerson(person.id)
-                  return (
-                    <s-clickable
-                      key={person.id}
-                      background="base"
-                      padding="base"
-                      borderRadius="small"
-                      onClick={() => setSelectedPersonId(person.id)}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <BlockStack gap="100">
-                          <Text as="p" variant="bodyMd" fontWeight="semibold">
-                            {person.name}
-                          </Text>
-                          {subgroup && (
-                            <div>
+              <s-section padding="none">
+                <s-table>
+                  <s-table-header-row>
+                    <s-table-header>Name</s-table-header>
+                    <s-table-header>Subgroup</s-table-header>
+                  </s-table-header-row>
+                  <s-table-body>
+                    {filteredPeople.map((person) => {
+                      const subgroup = getSubgroupForPerson(person.id)
+                      return (
+                        <s-table-row
+                          key={person.id}
+                          interactive
+                          onClick={() => setSelectedPersonId(person.id)}
+                        >
+                          <s-table-cell>
+                            <Text as="span" fontWeight="semibold">{person.name}</Text>
+                          </s-table-cell>
+                          <s-table-cell>
+                            {subgroup ? (
                               <Badge tone="info">{subgroup.name}</Badge>
-                            </div>
-                          )}
-                        </BlockStack>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7.5 15L12.5 10L7.5 5" stroke="#8C9196" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    </s-clickable>
-                  )
-                })}
-              </BlockStack>
+                            ) : (
+                              <Text as="span" tone="subdued">No subgroup</Text>
+                            )}
+                          </s-table-cell>
+                        </s-table-row>
+                      )
+                    })}
+                  </s-table-body>
+                </s-table>
+              </s-section>
             ) : (
               <div style={{ padding: '32px', textAlign: 'center' }}>
                 <Text as="p" tone="subdued">{searchQuery ? 'No people found' : 'No people added yet. Add someone to get started!'}</Text>
@@ -363,39 +387,42 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
               <Button onClick={() => openSubgroupModal()} size="slim">Create Subgroup</Button>
             </InlineStack>
             {subgroups.length > 0 ? (
-              <BlockStack gap="200">
-                {subgroups.map((subgroup) => {
-                  const members = subgroupMembers
-                    .filter(sm => sm.subgroup_id === subgroup.id)
-                    .map(sm => people.find(p => p.id === sm.person_id))
-                    .filter(Boolean)
-                    .map(p => p!.name)
-                  
-                  return (
-                    <s-clickable
-                      key={subgroup.id}
-                      background="base"
-                      padding="base"
-                      borderRadius="small"
-                      onClick={() => setSelectedSubgroupId(subgroup.id)}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <BlockStack gap="100">
-                          <Text as="p" variant="bodyMd" fontWeight="semibold">
-                            {subgroup.name}
-                          </Text>
-                          <Text as="p" variant="bodySm" tone="subdued">
-                            {members.length} {members.length === 1 ? 'member' : 'members'} · {members.join(', ')}
-                          </Text>
-                        </BlockStack>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7.5 15L12.5 10L7.5 5" stroke="#8C9196" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    </s-clickable>
-                  )
-                })}
-              </BlockStack>
+              <s-section padding="none">
+                <s-table>
+                  <s-table-header-row>
+                    <s-table-header>Name</s-table-header>
+                    <s-table-header>Members</s-table-header>
+                    <s-table-header>People</s-table-header>
+                  </s-table-header-row>
+                  <s-table-body>
+                    {subgroups.map((subgroup) => {
+                      const members = subgroupMembers
+                        .filter(sm => sm.subgroup_id === subgroup.id)
+                        .map(sm => people.find(p => p.id === sm.person_id))
+                        .filter(Boolean)
+                        .map(p => p!.name)
+                      
+                      return (
+                        <s-table-row
+                          key={subgroup.id}
+                          interactive
+                          onClick={() => setSelectedSubgroupId(subgroup.id)}
+                        >
+                          <s-table-cell>
+                            <Text as="span" fontWeight="semibold">{subgroup.name}</Text>
+                          </s-table-cell>
+                          <s-table-cell>
+                            {members.length} {members.length === 1 ? 'member' : 'members'}
+                          </s-table-cell>
+                          <s-table-cell>
+                            <Text as="span" tone="subdued">{members.join(', ')}</Text>
+                          </s-table-cell>
+                        </s-table-row>
+                      )
+                    })}
+                  </s-table-body>
+                </s-table>
+              </s-section>
             ) : (
               <div style={{ padding: '32px', textAlign: 'center' }}>
                 <Text as="p" tone="subdued">No subgroups created yet. Create one to group people together!</Text>
@@ -413,7 +440,8 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
           content: 'Add',
           onAction: handleAddPerson,
           loading: adding,
-          disabled: !newPersonName.trim()
+          disabled: !newPersonName.trim(),
+          tone: 'success'
         }}
         secondaryActions={[
           {
@@ -463,7 +491,8 @@ export default function PeopleManager({ occasionId, onUpdate }: Props) {
           content: editingSubgroup ? 'Update Subgroup' : 'Create Subgroup',
           onAction: handleCreateOrUpdateSubgroup,
           loading: creatingSubgroup,
-          disabled: !newSubgroupName.trim() || selectedMembers.size === 0
+          disabled: !newSubgroupName.trim() || selectedMembers.size === 0,
+          tone: 'success'
         }}
         secondaryActions={[
           {

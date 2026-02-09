@@ -68,6 +68,9 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
   const [removeMemberModalOpen, setRemoveMemberModalOpen] = useState(false)
   const [memberToRemove, setMemberToRemove] = useState<Person | null>(null)
   const [removingMember, setRemovingMember] = useState(false)
+  
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     loadData()
@@ -246,9 +249,11 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
 
       setSubgroup({ ...subgroup, name: nameValue.trim() })
       setEditingName(false)
+      setSuccessMessage('Name updated successfully!')
       onUpdate?.()
     } catch (error) {
       console.error('Error updating name:', error)
+      setErrorMessage('Failed to update name. Please try again.')
     }
   }
 
@@ -293,10 +298,12 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
       setNewExpense({ amount: '', description: '', category: 'food', note: '' })
       setSelectedPeople(new Set())
       setAddExpenseModalOpen(false)
+      setSuccessMessage('Expense added successfully!')
       loadData()
       onUpdate?.()
     } catch (error) {
       console.error('Error adding expense:', error)
+      setErrorMessage('Failed to add expense. Please try again.')
     } finally {
       setAddingExpense(false)
     }
@@ -326,10 +333,12 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
       }
 
       setManageMembersModalOpen(false)
+      setSuccessMessage('Members updated successfully!')
       loadData()
       onUpdate?.()
     } catch (error) {
       console.error('Error updating members:', error)
+      setErrorMessage('Failed to update members. Please try again.')
     } finally {
       setUpdatingMembers(false)
     }
@@ -390,10 +399,12 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
 
       setRemoveMemberModalOpen(false)
       setMemberToRemove(null)
+      setSuccessMessage('Member removed successfully!')
       loadData()
       onUpdate?.()
     } catch (error) {
       console.error('Error removing member:', error)
+      setErrorMessage('Failed to remove member. Please try again.')
     } finally {
       setRemovingMember(false)
     }
@@ -417,6 +428,18 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
             <Button variant="primary" tone="critical" onClick={() => setDeleteModalOpen(true)}>Delete Subgroup</Button>
           </InlineStack>
         </div>
+
+        {successMessage && (
+          <s-banner heading="Changes saved" tone="success" dismissible={true} onDismiss={() => setSuccessMessage(null)}>
+            {successMessage}
+          </s-banner>
+        )}
+
+        {errorMessage && (
+          <s-banner heading="Failed to save changes" tone="critical" dismissible={true} onDismiss={() => setErrorMessage(null)}>
+            {errorMessage} Check your connection and try again.
+          </s-banner>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
           <BlockStack gap="400">
@@ -508,7 +531,7 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
                                 <Text as="span" fontWeight="semibold">{expense.description}</Text>
                               </s-table-cell>
                               <s-table-cell>
-                                <s-chip color="strong">{expense.category}</s-chip>
+                                <s-chip tone="strong">{expense.category}</s-chip>
                               </s-table-cell>
                               <s-table-cell>
                                 ${Number(expense.amount).toFixed(2)}
@@ -623,7 +646,8 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
           content: 'Add Expense',
           onAction: handleAddExpense,
           loading: addingExpense,
-          disabled: !newExpense.amount || !newExpense.description || selectedPeople.size === 0
+          disabled: !newExpense.amount || !newExpense.description || selectedPeople.size === 0,
+          tone: 'success'
         }}
         secondaryActions={[
           {
@@ -691,7 +715,8 @@ export default function SubgroupDetail({ subgroupId, occasionId, onBack, onUpdat
         primaryAction={{
           content: 'Update Members',
           onAction: handleUpdateMembers,
-          loading: updatingMembers
+          loading: updatingMembers,
+          tone: 'success'
         }}
         secondaryActions={[
           {

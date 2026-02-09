@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Card, TextField, Button, Select, BlockStack, InlineStack, Text, Modal, Checkbox } from '@shopify/polaris'
+import { Card, TextField, Button, Select, BlockStack, InlineStack, Text, Modal, Checkbox, Badge, Banner } from '@shopify/polaris'
 import { supabase, type Person, type Expense, type ExpenseSplit } from '../lib/supabase'
+import ExpenseDetail from './ExpenseDetail'
 
 const EXPENSE_CATEGORIES = [
   { label: 'Accommodation', value: 'accommodation' },
@@ -26,6 +27,7 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [splits, setSplits] = useState<Record<string, ExpenseSplit[]>>({})
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null)
   
   const [newExpense, setNewExpense] = useState({
     payer: '',
@@ -36,6 +38,9 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
   })
   const [selectedPeople, setSelectedPeople] = useState<Set<string>>(new Set())
   const [adding, setAdding] = useState(false)
+  
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     loadExpenses()
@@ -69,6 +74,7 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
       setSplits(splitsByExpense)
     } catch (error) {
       console.error('Error loading expenses:', error)
+      setErrorMessage('Failed to load expenses. Please refresh the page.')
     }
   }
 
@@ -118,46 +124,17 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
       })
       setSelectedPeople(new Set())
       setIsModalOpen(false)
+      setSuccessMessage('Expense added successfully!')
       loadExpenses()
       onUpdate()
     } catch (error) {
       console.error('Error adding expense:', error)
+      setErrorMessage('Failed to add expense. Please try again.')
     } finally {
       setAdding(false)
     }
   }
 
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null)
-  const [deleting, setDeleting] = useState(false)
-
-  const handleDeleteExpense = async () => {
-    if (!expenseToDelete) return
-    
-    setDeleting(true)
-    try {
-      const { error } = await supabase
-        .from('expenses')
-        .delete()
-        .eq('id', expenseToDelete)
-
-      if (error) throw error
-
-      setDeleteModalOpen(false)
-      setExpenseToDelete(null)
-      loadExpenses()
-      onUpdate()
-    } catch (error) {
-      console.error('Error deleting expense:', error)
-    } finally {
-      setDeleting(false)
-    }
-  }
-
-  const openDeleteModal = (expenseId: string) => {
-    setExpenseToDelete(expenseId)
-    setDeleteModalOpen(true)
-  }
 
   const togglePerson = (personId: string) => {
     const newSelected = new Set(selectedPeople)
@@ -171,6 +148,23 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
 
   const payerOptions = people.map(p => ({ label: p.name, value: p.id }))
 
+  const totalSpent = expenses.reduce((sum, exp) => sum + Number(exp.amount), 0)
+  const categories = new Set(expenses.map(e => e.category))
+
+  if (selectedExpenseId) {
+    return (
+      <ExpenseDetail
+        expenseId={selectedExpenseId}
+        occasionId={occasionId}
+        onBack={() => setSelectedExpenseId(null)}
+        onUpdate={() => {
+          loadExpenses()
+          onUpdate()
+        }}
+      />
+    )
+  }
+
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
       <BlockStack gap="400">
@@ -179,77 +173,100 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
           <Button onClick={() => setIsModalOpen(true)} variant="primary">Add Expense</Button>
         </div>
 
+        {successMessage && (
+          <s-banner heading="Expense added" tone="success" dismissible={true} onDismiss={() => setSuccessMessage(null)}>
+            {successMessage}
+          </s-banner>
+        )}
+
+        {errorMessage && (
+          <s-banner heading="Failed to add expense" tone="critical" dismissible={true} onDismiss={() => setErrorMessage(null)}>
+            {errorMessage} Check your connection and try again.
+          </s-banner>
+        )}
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '16px'
+        }}>
+          <Card>
+            <BlockStack gap="200">
+              <Text as="p" variant="bodySm" tone="subdued">Total Expenses</Text>
+              <Text as="h3" variant="headingXl">{expenses.length}</Text>
+            </BlockStack>
+          </Card>
+          <Card>
+            <BlockStack gap="200">
+              <Text as="p" variant="bodySm" tone="subdued">Total Spent</Text>
+              <Text as="h3" variant="headingXl">${totalSpent.toFixed(2)}</Text>
+            </BlockStack>
+          </Card>
+          <Card>
+            <BlockStack gap="200">
+              <Text as="p" variant="bodySm" tone="subdued">Categories Used</Text>
+              <Text as="h3" variant="headingXl">{categories.size}</Text>
+            </BlockStack>
+          </Card>
+        </div>
+
         <Card>
           <BlockStack gap="400">
 
           {expenses.length > 0 ? (
             <s-section padding="none">
               <s-table>
-              <s-table-header-row>
-                <s-table-header>Date</s-table-header>
-                <s-table-header>Payer</s-table-header>
-                <s-table-header format="currency">Amount</s-table-header>
-                <s-table-header>Description</s-table-header>
-                <s-table-header>Category</s-table-header>
-                <s-table-header>Split With</s-table-header>
-                <s-table-header>Actions</s-table-header>
-              </s-table-header-row>
-              <s-table-body>
-                {expenses.map(expense => {
-                  const payer = people.find(p => p.id === expense.payer_person_id)
-                  const expenseSplits = splits[expense.id] || []
-                  const splitWith = expenseSplits
-                    .map(s => people.find(p => p.id === s.person_id)?.name)
-                    .filter(Boolean)
-                    .join(', ')
-                  
-                  return (
-                    <s-table-row key={expense.id}>
-                      <s-table-cell>{new Date(expense.date).toLocaleDateString()}</s-table-cell>
-                      <s-table-cell><s-chip>{payer?.name || 'Unknown'}</s-chip></s-table-cell>
-                      <s-table-cell>${Number(expense.amount).toFixed(2)}</s-table-cell>
-                      <s-table-cell>{expense.description}</s-table-cell>
-                      <s-table-cell><s-chip color="strong">{expense.category}</s-chip></s-table-cell>
-                      <s-table-cell>{splitWith}</s-table-cell>
-                      <s-table-cell>
-                        <Button onClick={() => openDeleteModal(expense.id)} tone="critical" size="slim">
-                          Delete
-                        </Button>
-                      </s-table-cell>
-                    </s-table-row>
-                  )
-                })}
-              </s-table-body>
+                <s-table-header-row>
+                  <s-table-header>Date</s-table-header>
+                  <s-table-header>Description</s-table-header>
+                  <s-table-header>Payer</s-table-header>
+                  <s-table-header>Category</s-table-header>
+                  <s-table-header>Split With</s-table-header>
+                  <s-table-header format="currency">Amount</s-table-header>
+                </s-table-header-row>
+                <s-table-body>
+                  {expenses.map(expense => {
+                    const payer = people.find(p => p.id === expense.payer_person_id)
+                    const expenseSplits = splits[expense.id] || []
+                    
+                    return (
+                      <s-table-row 
+                        key={expense.id}
+                        interactive
+                        onClick={() => setSelectedExpenseId(expense.id)}
+                      >
+                        <s-table-cell>
+                          {new Date(expense.date).toLocaleDateString()}
+                        </s-table-cell>
+                        <s-table-cell>
+                          <Text as="span" fontWeight="semibold">{expense.description}</Text>
+                        </s-table-cell>
+                        <s-table-cell>
+                          <s-chip>{payer?.name || 'Unknown'}</s-chip>
+                        </s-table-cell>
+                        <s-table-cell>
+                          <s-chip tone="strong">{expense.category}</s-chip>
+                        </s-table-cell>
+                        <s-table-cell>
+                          {expenseSplits.length} {expenseSplits.length === 1 ? 'person' : 'people'}
+                        </s-table-cell>
+                        <s-table-cell>
+                          ${Number(expense.amount).toFixed(2)}
+                        </s-table-cell>
+                      </s-table-row>
+                    )
+                  })}
+                </s-table-body>
               </s-table>
             </s-section>
           ) : (
-            <Text as="p" tone="subdued">No expenses yet. Add an expense to get started!</Text>
+            <div style={{ padding: '32px', textAlign: 'center' }}>
+              <Text as="p" tone="subdued">No expenses yet. Add an expense to get started!</Text>
+            </div>
           )}
           </BlockStack>
         </Card>
       </BlockStack>
-
-      <Modal
-        open={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        title="Delete Expense"
-        primaryAction={{
-          content: 'Delete',
-          onAction: handleDeleteExpense,
-          loading: deleting,
-          destructive: true
-        }}
-        secondaryActions={[
-          {
-            content: 'Cancel',
-            onAction: () => setDeleteModalOpen(false)
-          }
-        ]}
-      >
-        <Modal.Section>
-          <Text as="p">Are you sure you want to delete this expense? This action cannot be undone.</Text>
-        </Modal.Section>
-      </Modal>
 
       <Modal
         open={isModalOpen}
@@ -259,7 +276,8 @@ export default function ExpenseManager({ occasionId, people, onUpdate }: Props) 
           content: 'Add Expense',
           onAction: handleAddExpense,
           loading: adding,
-          disabled: !newExpense.payer || !newExpense.amount || !newExpense.description || selectedPeople.size === 0
+          disabled: !newExpense.payer || !newExpense.amount || !newExpense.description || selectedPeople.size === 0,
+          tone: 'success'
         }}
         secondaryActions={[
           {

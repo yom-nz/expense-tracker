@@ -81,6 +81,9 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
   const [removeSubgroupModalOpen, setRemoveSubgroupModalOpen] = useState(false)
   const [subgroupToRemove, setSubgroupToRemove] = useState<Subgroup | null>(null)
   const [removingFromSubgroup, setRemovingFromSubgroup] = useState(false)
+  
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     loadData()
@@ -279,9 +282,11 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
 
       setPerson({ ...person, name: nameValue.trim() })
       setEditingName(false)
+      setSuccessMessage('Name updated successfully!')
       onUpdate?.()
     } catch (error) {
       console.error('Error updating name:', error)
+      setErrorMessage('Failed to update name. Please try again.')
     }
   }
 
@@ -323,10 +328,12 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
       setNewExpense({ amount: '', description: '', category: 'food', note: '' })
       setSelectedPeople(new Set())
       setAddExpenseModalOpen(false)
+      setSuccessMessage('Expense added successfully!')
       loadData()
       onUpdate?.()
     } catch (error) {
       console.error('Error adding expense:', error)
+      setErrorMessage('Failed to add expense. Please try again.')
     } finally {
       setAddingExpense(false)
     }
@@ -350,10 +357,12 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
 
       setNewSettlement({ to: '', amount: '' })
       setAddSettlementModalOpen(false)
+      setSuccessMessage('Settlement recorded successfully!')
       loadData()
       onUpdate?.()
     } catch (error) {
       console.error('Error adding settlement:', error)
+      setErrorMessage('Failed to record settlement. Please try again.')
     } finally {
       setAddingSettlement(false)
     }
@@ -383,10 +392,12 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
       }
 
       setManageSubgroupsModalOpen(false)
+      setSuccessMessage('Subgroups updated successfully!')
       loadData()
       onUpdate?.()
     } catch (error) {
       console.error('Error updating subgroups:', error)
+      setErrorMessage('Failed to update subgroups. Please try again.')
     } finally {
       setUpdatingSubgroups(false)
     }
@@ -447,10 +458,12 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
 
       setRemoveSubgroupModalOpen(false)
       setSubgroupToRemove(null)
+      setSuccessMessage('Removed from subgroup successfully!')
       loadData()
       onUpdate?.()
     } catch (error) {
       console.error('Error removing from subgroup:', error)
+      setErrorMessage('Failed to remove from subgroup. Please try again.')
     } finally {
       setRemovingFromSubgroup(false)
     }
@@ -475,6 +488,18 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
             <Button variant="primary" tone="critical" onClick={() => setDeleteModalOpen(true)}>Delete Person</Button>
           </InlineStack>
         </div>
+
+        {successMessage && (
+          <s-banner heading="Changes saved" tone="success" dismissible={true} onDismiss={() => setSuccessMessage(null)}>
+            {successMessage}
+          </s-banner>
+        )}
+
+        {errorMessage && (
+          <s-banner heading="Failed to save changes" tone="critical" dismissible={true} onDismiss={() => setErrorMessage(null)}>
+            {errorMessage} Check your connection and try again.
+          </s-banner>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
           <BlockStack gap="400">
@@ -540,7 +565,7 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
                                 <Text as="span" fontWeight="semibold">{expense.description}</Text>
                               </s-table-cell>
                               <s-table-cell>
-                                <s-chip color="strong">{expense.category}</s-chip>
+                                <s-chip tone="strong">{expense.category}</s-chip>
                               </s-table-cell>
                               <s-table-cell>
                                 ${Number(expense.amount).toFixed(2)}
@@ -687,7 +712,8 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
           content: 'Add Expense',
           onAction: handleAddExpense,
           loading: addingExpense,
-          disabled: !newExpense.amount || !newExpense.description || selectedPeople.size === 0
+          disabled: !newExpense.amount || !newExpense.description || selectedPeople.size === 0,
+          tone: 'success'
         }}
         secondaryActions={[
           {
@@ -756,7 +782,8 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
           content: 'Add Settlement',
           onAction: handleAddSettlement,
           loading: addingSettlement,
-          disabled: !newSettlement.to || !newSettlement.amount
+          disabled: !newSettlement.to || !newSettlement.amount,
+          tone: 'success'
         }}
         secondaryActions={[
           {
@@ -795,7 +822,8 @@ export default function PersonDetail({ personId, occasionId, onBack, onUpdate }:
         primaryAction={{
           content: 'Update Subgroups',
           onAction: handleUpdateSubgroups,
-          loading: updatingSubgroups
+          loading: updatingSubgroups,
+          tone: 'success'
         }}
         secondaryActions={[
           {

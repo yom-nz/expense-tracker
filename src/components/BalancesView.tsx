@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, BlockStack, Text, InlineStack, Button, Modal, Select, TextField, List } from '@shopify/polaris'
+import { Card, BlockStack, Text, InlineStack, Button, Modal, Select, TextField, List, Banner } from '@shopify/polaris'
 import { supabase, type Person, type Expense, type Settlement } from '../lib/supabase'
 
 interface Props {
@@ -25,6 +25,9 @@ export default function BalancesView({ occasionId, people, expenses, settlements
     amount: ''
   })
   const [adding, setAdding] = useState(false)
+  
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     calculateBalances()
@@ -95,9 +98,11 @@ export default function BalancesView({ occasionId, people, expenses, settlements
 
       setNewSettlement({ from: '', to: '', amount: '' })
       setIsModalOpen(false)
+      setSuccessMessage('Settlement recorded successfully!')
       onSettlementAdded()
     } catch (error) {
       console.error('Error adding settlement:', error)
+      setErrorMessage('Failed to record settlement. Please try again.')
     } finally {
       setAdding(false)
     }
@@ -145,6 +150,18 @@ export default function BalancesView({ occasionId, people, expenses, settlements
           <Text as="h2" variant="headingLg">Balances</Text>
           <Button onClick={() => setIsModalOpen(true)} variant="primary">Record Settlement</Button>
         </div>
+
+        {successMessage && (
+          <s-banner heading="Settlement recorded" tone="success" dismissible={true} onDismiss={() => setSuccessMessage(null)}>
+            {successMessage}
+          </s-banner>
+        )}
+
+        {errorMessage && (
+          <s-banner heading="Failed to record settlement" tone="critical" dismissible={true} onDismiss={() => setErrorMessage(null)}>
+            {errorMessage} Verify both people exist and try again.
+          </s-banner>
+        )}
 
         <Card>
           <BlockStack gap="400">
@@ -210,7 +227,8 @@ export default function BalancesView({ occasionId, people, expenses, settlements
           content: 'Record Settlement',
           onAction: handleAddSettlement,
           loading: adding,
-          disabled: !newSettlement.from || !newSettlement.to || !newSettlement.amount
+          disabled: !newSettlement.from || !newSettlement.to || !newSettlement.amount,
+          tone: 'success'
         }}
         secondaryActions={[
           {

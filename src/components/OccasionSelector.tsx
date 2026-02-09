@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Modal, TextField, BlockStack } from '@shopify/polaris'
+import { Modal, TextField, BlockStack, Banner } from '@shopify/polaris'
 import { supabase, type Occasion } from '../lib/supabase'
 
 interface Props {
@@ -16,6 +16,7 @@ export default function OccasionSelector({ onOccasionCreated, isOpen, onClose }:
   const [newOccasionIcon, setNewOccasionIcon] = useState('')
   const [newOccasionDescription, setNewOccasionDescription] = useState('')
   const [creating, setCreating] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleCreateOccasion = async () => {
     if (!newOccasionName.trim()) return
@@ -39,6 +40,7 @@ export default function OccasionSelector({ onOccasionCreated, isOpen, onClose }:
       onClose()
     } catch (error) {
       console.error('Error creating occasion:', error)
+      setErrorMessage('Failed to create occasion. Please try again.')
     } finally {
       setCreating(false)
     }
@@ -53,7 +55,8 @@ export default function OccasionSelector({ onOccasionCreated, isOpen, onClose }:
           content: 'Create',
           onAction: handleCreateOccasion,
           loading: creating,
-          disabled: !newOccasionName.trim()
+          disabled: !newOccasionName.trim(),
+          tone: 'success'
         }}
         secondaryActions={[
           {
@@ -63,6 +66,12 @@ export default function OccasionSelector({ onOccasionCreated, isOpen, onClose }:
         ]}
       >
         <Modal.Section>
+          {errorMessage && (
+            <Banner tone="critical" onDismiss={() => setErrorMessage(null)}>
+              {errorMessage}
+            </Banner>
+          )}
+          
           <BlockStack gap="400">
             <TextField
               label="Occasion Name"
